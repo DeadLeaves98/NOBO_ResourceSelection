@@ -1,10 +1,16 @@
+#### Title: Tracking Frequency Histograms ----
+#### Author: Dr. McNeil and Autumn Randall 
+#### Date Started: 1/10/2024
+#### Last Date Editted: 1/11/2024 (Adding the title)
+
+
 library(dplyr); library(stringr); library(lubridate); library(tidyr)
 nobo1 <- read.csv("Orton_Bobwhite_Telemetry_Data_Entry_0.csv")
 head(nobo1)
 nrow(nobo1) # 38810
 
 ##########################################
-########################################## NORMAL DATA WRANGLING/CLEANING
+########################################## NORMAL DATA WRANGLING/CLEANING ----
 ##########################################
 
 # clean this file up by removing the columns we do not need
@@ -65,6 +71,7 @@ nobo1 <- alives
 #nobo1 <- rbind(alives, fatedead, fatecensor, censors) # Restore this (and uncheck prev line) if fated birds are desired
 nobo1 <- nobo1 %>% arrange(ObjectID) # re-order columns
 
+# Date Modification ----
 # modifying the dates to something easier to handle
 nobodates <- data.frame("Date" = nobo1$Date)
 nobodates$Date <- str_replace(nobodates$Date, " AM", "") #replace AM with nothing
@@ -98,11 +105,12 @@ nobo1$yearBinary = ifelse(nobo1$year == 2023, 1, 0)
 ########################################## END DATA WRANGLING/CLEANING
 ##########################################
 
-
+# Tracking Frequency forloop ----
 # how many birds do we have?
 head(unique(nobo1$Bird.ID))
 
 focB <- subset(nobo1, Bird.ID == "165.535_220574")
+
 durB <- max(focB$ordinal) - min(focB$ordinal) # duration of tracking in days
 durBW <- durB/7 # duration of tracking in weeks
 freqB <- nrow(focB)/durBW # times tracked per week
@@ -124,6 +132,9 @@ for(i in 1:length(unique(nobo1$Bird.ID))){
 df1 <- df1[2:nrow(df1),] # remove first row
 df1 <- subset(df1, NTimesTracked >= 5)
 df1
-hist(df1$WeeklyFreq)
+# Histogram ----
+hist(df1$WeeklyFreq) # visualizes the frequency in which birds have been tracked during the week 
+# majority of birds were tracked beteen 2 - 4 times a week 
+
 
 
