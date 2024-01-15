@@ -1,3 +1,9 @@
+# Title: Data wrangling and data thinning for Resource Selection 
+# Author: Autumn Randall 
+# PI: Dr. DJ McNeil
+# Date finished: 1/15/2024 @ noon 
+# Date last Edited: 1/15/2024 @ noon 
+##################################################
 
 library(dplyr); library(stringr); library(lubridate); library(tidyr)
 nobo1 <- read.csv("Orton_Bobwhite_Telemetry_Data_Entry_0.csv")
@@ -25,7 +31,7 @@ nobo1 <- nobo1 %>% mutate(Date = as.Date(Date, format = "%m/%d/%Y"))
 
 # Some chicks were entered as broods and we need to remove these chicks from the data 
 nrow(nobo1) # 31877
-nobo1$chick <- data.frame("band" = substr(nobo1$Bird.ID, 9, 11)) # isolate the first 3 numbers of band number
+nobo1$chick <- paste0("band" = substr(nobo1$Bird.ID, 9, 11)) # isolate the first 3 numbers of band number
 
 # subset the entire year of 2022 (1st line) then eliminate chick bands (which start with 225)
 nobosub2022 <- nobo1[nobo1$Date >= "2022-01-01" & nobo1$Date <= "2022-12-31", ]
@@ -162,10 +168,13 @@ sum(l,m,a) # 169
 
 nobo1 <- subset(nobo1, n >= 4) # only include birds greater than or equal to 4 
 length(unique(nobo1$Bird.ID)) # only 604  birds...  
-
+nrow(nobo1)
 ########################## FINISH DATA WRANGLING ############################
 
+#nobo2 <- nobo1[,1:9]
+#nobo2 <- nobo1[,1:10]
 
+write.csv(nobo1, "./cleaned_NOBO_telem.csv")
 
 ################ MCP ----
 #################################### Make MCP and randoms for one bird to make sure I have the code working right
