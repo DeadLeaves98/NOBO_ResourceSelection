@@ -166,7 +166,7 @@ head(m2) #
 
 sum(l,m,a) # 169
 
-nobo1 <- subset(nobo1, n >= 4) # only include birds greater than or equal to 4 
+nobo1 <- subset(nobo1, n > 4) # over 4 locations (5 or more or else during the mcp i get an error)
 length(unique(nobo1$Bird.ID)) # only 604  birds...  
 nrow(nobo1)
 ########################## FINISH DATA WRANGLING ############################
@@ -175,55 +175,3 @@ nrow(nobo1)
 #nobo2 <- nobo1[,1:10]
 
 write.csv(nobo1, "./cleaned_NOBO_telem.csv")
-
-################ MCP ----
-#################################### Make MCP and randoms for one bird to make sure I have the code working right
-
-# Update: Will remove the buffer for newest analysis that we decided on during a meeting on 1/12/2024
-
-# subset one bird using the subset function
-bob1 <- subset(nobo1, Bird.ID == unique(nobo1$Bird.ID)[100]) # randomly subsetting the data and taking the 100th bird
-bob1 # 162.483_220039
-
-# Make MCP using the MCP function; need to convert bob1 to spatial object first though
-bob_sp <- SpatialPoints(coords = data.frame("x" = bob1$x, "y" = bob1$y)) # convert to spatial object
-crs(bob_sp) <- CRS("+init=epsg:4326") # define CRS 
-plot(bob_sp) # make sure it worked
-mcp <- mcp(bob_sp, percent=100) # create MCP for bob_sp
-# NOTE: throws warning "GEOS support is provided by..." but I think it's fine
-plot(mcp, add = TRUE) # overlay MCP to make sure it worked
-crs(mcp) 
-crs(bob_sp)
-
-# If we want to add a buffer we can use the next chunk of code 
-
-# Make 200m buffer around the MCP 
-# albers <- "+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=37.5 +lon_0=-96 +x_0=0 +y_0=0 +ellps=GRS80 +datum=NAD83 +units=m +no_defs"
-# mcp1 <- spTransform(mcp, CRS(albers)) # transform MCP to projected coordinate system
-# bob_sp1 <- spTransform(bob_sp, CRS(albers)) # transform points to projected coordinate system
- #plot(mcp1); plot(bob_sp1, add = TRUE) # coordinate systems should match: North American Datum 1983
-# buff1 <- gBuffer(mcp1, width=200)
-# NOTE: throws warning "In proj4string(xy) : CRS object has comment..." but I think it's fine
-# plot(buff1, add = TRUE)
-
-
-# generate random points (requires st_sample() which can only be done using sf)
-mcp1_sf <- st_as_sf(mcp1) # convert our MCP1 to sf (im assuming this means spatial feature?)
-points1 = st_sample(mcp1, size=nrow(bob1) * 2) # generate 2 random points for each "used" point using st_sample() -- 2 is the consistent number that theron has referred to time and time again 
-points1 <- as_Spatial(points1) # convert back to sp
-plot(buff1); plot(points1, add = TRUE, col = "red"); plot(bob_sp1, add = TRUE, col = "blue") # plot to confirm it worked
-points2 <- spTransform(points1, CRS("+init=epsg:4326")) # convert to lat/long because this is what nobo1 uses
-randomcoords <- data.frame(points2@coords) # extract lat/long from the points and convert to data.frame
-
-#################################### make the dataframe for randoms suitable for rbind()
-
-head(nobo1) # take a look at NOBO data.frame
-# next, make the new piece of data to be r-binded
-newrandoms <- data.frame("GlobalID" = NA, "Date" = NA, "Observer" = NA, "Bird.ID" = bob1$Bird.ID,
-                         "Bird.Status" = NA, "Location.Type" = "Random", "Habitat.Type" = NA,
-                         "Burn.Status" = NA, "x" = NA, "y" = NA)
-bob1 <- dplyr::select(bob1, -n)
-bob1 <- rbind(bob1, newrandoms) # combine the new "randoms" with the real data
-#View(bob1)
-
-
