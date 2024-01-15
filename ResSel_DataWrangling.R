@@ -106,14 +106,24 @@ unique(nobo1$Bird.Status)
 length(unique(nobo1$Bird.ID)) #918 -- this is before anything is done
 
 # isolate the broods and remove the nests 
-broods = subset(nobo1, Bird.Status == "Brood")
-notbroods = subset(nobo1, Bird.Status == "Alive & Active" | Bird.Status == "Alive and Inactive" | Bird.Status == "Suspected Nest" | Bird.Status == "Alive - Mort Check Only")
-nests = subset(nobo1, Bird.Status == "Nest") #just to see how many there are 
-length(unique(nests$Bird.ID)) #190 unique Bird.IDs labeled nest
+  # I thought this would be simple but its not
+  # Location.Type and Bird.Status both have 'broods' as an option 
+  # therefore some broods may say the location.type as regular with the bird.status as brood  OR location.type is brood with the bird.status as regular. 
+nobo00 = within(nobo1, Location.Type[Location.Type == 'Regular' & Bird.Status == 'Brood'] <- 'Brood') # within the nobo1 dataset, if the location.type
+  # column says regular but the bird.status column says brood, then change the location.type to brood
+nobo1 = nobo00 # revert it back for ease 
 
-x = length(unique(notbroods$Bird.ID)) #694 
-y = length(unique(broods$Bird.ID)) # 85 brooooooods  !!!!
-x+y #779 - at the end of this next chunk it should be the same number as this 
+broods = subset(nobo1, Location.Type == "Brood") #subset for broods 
+notbroods = subset(nobo1, Location.Type == "Regular") #subset for regular adults
+unique(broods$Bird.Status)
+unique(notbroods$Bird.Status) 
+
+nests = subset(nobo1, Location.Type == "Nest") #just to see how many there are 
+length(unique(nests$Bird.ID)) #266 unique Bird.IDs labeled nest
+
+x = length(unique(notbroods$Bird.ID)) #916 
+y = length(unique(broods$Bird.ID)) # 180 brooooooods  !!!!
+x+y #1096 - at the end of this next chunk it should be the same number as this 
 
 # View(broods)
 #### Brood points ---- 
@@ -169,6 +179,8 @@ sum(l,m,a) # 169
 nobo1 <- subset(nobo1, n > 4) # over 4 locations (5 or more or else during the mcp i get an error)
 length(unique(nobo1$Bird.ID)) # only 604  birds...  
 nrow(nobo1)
+
+unique(nobo1$Location.Type)
 ########################## FINISH DATA WRANGLING ############################
 
 #nobo2 <- nobo1[,1:9]
