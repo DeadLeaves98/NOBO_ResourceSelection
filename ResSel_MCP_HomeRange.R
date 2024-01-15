@@ -17,6 +17,10 @@ unique(nobo1$Bird.Status) # If this says nest that is okay -- usually means bird
 # one last tweak so at the end we only have regular and random pts
 nobo1 = within(nobo1, Location.Type[Location.Type == 'Brood'] <- 'Regular')
 
+################################################################################
+################################################################################
+
+                            #### PART 1: MCP ####
 #### TESTER BIRD ----
 # subset one bird using the subset function
 bob1 <- subset(nobo1, Bird.ID == unique(nobo1$Bird.ID)[100]) # randomly subsetting the data and taking the 200th bird
@@ -60,9 +64,9 @@ nrow(bob1) #68 = 34 observations * 2
 #### TEST BIRD: END ---- 
 
 
-#######################################
-####################################### MCP FORLOOP ALL----
-#######################################
+
+#############################
+############################# MCP FORLOOP()----
 
 # save Alber's Equal Area Conic projection
 albers <- "+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=37.5 +lon_0=-96 +x_0=0 +y_0=0 +ellps=GRS80 +datum=NAD83 +units=m +no_defs"
@@ -72,8 +76,7 @@ RandomsDF <- data.frame("X" = NA, "Bird.ID" = NA, "ObjectID" = NA, "Date" = NA, 
                         "Bird.Status" = NA, "Fate" = NA, "Location.Type" = "Random", "x" = NA, "y" = NA, "encounter" = NA,
                         "year" = NA, "ordinal" = NA, "week" = NA, "breedingseason" = NA, "breedingseasonCov" = NA, "yearBinary" = NA)
 
-###################### The for() loop:
-
+####The for() loop:
 for(i in 1:length(unique(nobo1$Bird.ID))){
   
   # i = 33
@@ -111,7 +114,6 @@ for(i in 1:length(unique(nobo1$Bird.ID))){
                            "year" = NA, "ordinal" = NA, "week" = NA, "breedingseason" = NA, "breedingseasonCov" = NA, "yearBinary" = NA )
   RandomsDF <- rbind(RandomsDF, newrandoms) # combine the new "randoms" with the real data
 }
-
 #### END FORLOOP() ----
 
 #View(RandomsDF)
@@ -123,10 +125,79 @@ nobo2 <- rbind(nobo1, RandomsDF1)
 nobo2$response <- ifelse(nobo2$Location.Type == "Regular", 1, 0)
 unique(nobo2$Location.Type) # now I need to fix this.. 
 
+
+
 ################################################################################
 ################################################################################
 
-                #### ADDING COVARIATES ####
+                #### PART 2: ADDING COVARIATES ####
+
+#### Course  ---- 
+# Turn nobo2 to nobo for the sake of ease because I definitely just copied this code 
+nobo = nobo2
+
+
+# read in OP shapefile
+OP <- readOGR("E:/NOBO Project Data/Analyses/Breeding Season/Summer 2022/Adult data/Resource Use/shapefiles/OrtonCourses_JustTreatmentSites.shp")
+#OP <- readOGR("C:/Users/User/Desktop/Autumn_analyses/shapefiles/OrtonCourses_JustTreatmentSites.shp")
+
+# bird locations as spatial
+nobo_sp <- SpatialPoints(coords = data.frame("x" = nobo$x, "y" = nobo$y)) # convert DF to Spatial Points
+crs(nobo_sp) <- CRS("+init=epsg:4326") # define CRS for the spatial points (EPSG 4326 == lat/lon WGS84 etc)
+nobo_sp <- spTransform(nobo_sp, crs(OP)) # transform nobo_sp from WGS84 to match "roads"
+
+# make sure they look OK
+plot(OP); plot(nobo_sp, add = TRUE)
+
+# extract course ID for points
+extraction <- over(nobo_sp, OP)
+extraction$course <- ifelse(is.na(extraction$course), "other", extraction$course) # change "NA" to "other"
+extraction$course <- ifelse(extraction$course == "campcrane2", "campcrane", extraction$course) # change "campcrane2" to "campcrane"
+extraction$course <- ifelse(extraction$course == "campcrane1", "campcrane", extraction$course) # change "campcrane1" to "campcrane"
+unique(extraction$course)
+
+# same number of rows for "nobo" and "extract"
+nrow(nobo)
+length(extraction$course)
+
+# cbind course with bird observations
+nobo$course <- extraction$course
+head(nobo)
+
+# make sure it worked
+acb <- subset(nobo, course == "allenscreek")
+acb_sp <- SpatialPoints(coords = data.frame("x" = acb$x, "y" = acb$y)) # convert DF to Spatial Points
+crs(acb_sp) <- CRS("+init=epsg:4326") # define CRS for the spatial points (EPSG 4326 == lat/lon WGS84 etc)
+acb_sp <- spTransform(acb_sp, crs(OP)) # transform nobo_sp from WGS84 to match "roads"
+plot(OP); plot(acb_sp, add = TRUE, cex = 1, pch = ".")
+
+# Check to see if we are gucci
+head(nobo)
+names(nobo) # will remove extra columns later 
+
+
+##### Adding Burn Status ---- 
+# read in OP shapefile
+Burn <- readOGR("E:/NOBO Project Data/Analyses/Breeding Season/Summer 2022/Adult data/Resource Use/shapefiles/Master_Burn_Plan.shp")
+
+# make nobo match burn map
+nobo_sp1 <- spTransform(nobo_sp, crs(Burn)) # transform nobo_sp from WGS84 to match "burn"
+
+# Check Coordinate systems by plotting 
+plot(Burn); plot(nobo_sp1, add = TRUE)
+
+extraction <- over(nobo_sp1, Burn)# extract burn status for points
+
+# turn all nas within burnstatus.extract column into no 
+extraction["Burns_2022"][is.na(extraction["Burns_2022"])] <- "no" 
+unique(extraction$Burns_2022)
+
+# add burn status to NOBO
+nobo$burn_stat <- extraction$Burns_2022
+
+# remove old, shitty "burn status" that techs record in the field
+nobo <- dplyr::select(nobo, -Burn.Status)
+head(nobo)
 
 
 
