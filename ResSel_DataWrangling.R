@@ -181,9 +181,77 @@ length(unique(nobo1$Bird.ID)) # only 604  birds...
 nrow(nobo1)
 
 unique(nobo1$Location.Type)
-########################## FINISH DATA WRANGLING ############################
 
+
+########################## FINDING COURSE BASED OFF CENTROID FOR LATER FORLOOPS ----
+############################################################################################################
 #nobo2 <- nobo1[,1:9]
 #nobo2 <- nobo1[,1:10]
+
+
+# one last tweak so at the end we only have regular and random pts
+nobo1 = within(nobo1, Location.Type[Location.Type == 'Brood'] <- 'Regular')
+
+#############################
+############################# MCP FORLOOP()----
+
+# save Alber's Equal Area Conic projection
+albers <- "+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=37.5 +lon_0=-96 +x_0=0 +y_0=0 +ellps=GRS80 +datum=NAD83 +units=m +no_defs"
+
+# blankDF
+RandomsDF <- data.frame("X" = NA, "Bird.ID" = NA, "ObjectID" = NA, "Date" = NA, "Observer" = NA, 
+                        "Bird.Status" = NA, "Fate" = NA, "Location.Type" = "Random", "x" = NA, "y" = NA, "encounter" = NA,
+                        "year" = NA, "ordinal" = NA, "week" = NA, "breedingseason" = NA, "breedingseasonCov" = NA, "yearBinary" = NA)
+
+
+#### for() loop that identifies the bird's course via centroid
+# This is needed b/c the NEXT for() loop generates random points
+# within the course that each bird lives in
+
+CentroidCourses <- c() # blank object to hold course info
+
+for(i in 1:length(unique(nobo1$Bird.ID))){
+  
+  # i = 100
+  # subset one bird using the subset function
+  nobo_i <- subset(nobo1, Bird.ID == unique(nobo1$Bird.ID)[i]) # randomly subsetting the data and taking the 100th bird'
+  
+  # get the average point and make IT also a spatial object
+  nobo_i_avg_sp <- SpatialPoints(coords = data.frame("x" = mean(nobo_i$x), "y" = mean(nobo_i$y))) # convert DF to Spatial Points
+  crs(nobo_i_avg_sp) <- CRS("+init=epsg:4326") # define CRS for the spatial points (EPSG 4326 == lat/lon WGS84 etc)
+  nobo_i_avg_sp <- spTransform(nobo_i_avg_sp, crs(OP))
+  
+  # make sure they look OK
+  plot(OP); plot(nobo_i_avg_sp, add = TRUE, col = "blue") 
+  # extract course ID for points
+  extraction <- over(nobo_i_avg_sp, OP) # place the centroid over the top of the course shapefile
+  course_i <- extraction$course # extract course from the centroid 'bob_avg_sp'
+  course_i <- ifelse(is.na(course_i) == TRUE, "other", course_i)
+  
+  # add new course info to CentroidCourses
+  NewCourseData <- rep(course_i, nrow(nobo_i))
+  CentroidCourses <- c(CentroidCourses, NewCourseData)
+  
+  # progress bar
+  compl <- round(i/length(unique(nobo1$Bird.ID))*50,0)
+  cat(paste0("\r [", strrep("|", compl),strrep(".", 50-compl),"] ", round(100*i/length(unique(nobo1$Bird.ID)),0), "% complete"))
+  #print(paste0("[",strrep("|", compl),strrep(".", 50-compl),"] ", round(100*i/length(unique(nobo1$Bird.ID)),0), "% complete"))
+}
+
+# add CentroidCourses to nobo1
+nobo1$CentroidCourses <- CentroidCourses
+
+# combine campcranes 1 and 2
+nobo1$CentroidCourses <- ifelse(nobo1$CentroidCourses == "campcrane2", "campcrane", nobo1$CentroidCourses) # change "campcrane2" to "campcrane"
+nobo1$CentroidCourses <- ifelse(nobo1$CentroidCourses == "campcrane1", "campcrane", nobo1$CentroidCourses) # change "campcrane2" to "campcrane"
+
+# Also fix the names in the shapefile
+OP$course <- ifelse(OP$course == "campcrane2", "campcrane", OP$course) # change "campcrane2" to "campcrane"
+OP$course <- ifelse(OP$course == "campcrane1", "campcrane", OP$course) # change "campcrane2" to "campcrane"
+
+# remove birds that are not in real courses
+unique(nobo1$CentroidCourses)
+nobo1 <- subset(nobo1, CentroidCourses != "other")
+unique(nobo1$CentroidCourses)
 
 write.csv(nobo1, "./cleaned_NOBO_telem.csv")
