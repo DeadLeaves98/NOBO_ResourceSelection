@@ -9,6 +9,7 @@ library(dplyr); library(stringr); library(lubridate); library(tidyr)
 nobo1 <- read.csv("Orton_Bobwhite_Telemetry_Data_Entry_0.csv")
 head(nobo1)
 nrow(nobo1) # 38810
+OP <- readOGR("E:/NOBO Project Data/Analyses/Breeding Season/Summer 2022/Adult data/Resource Use/shapefiles/OrtonCourses_JustTreatmentSites.shp")
 
 ##########################################
 ########################################## NORMAL DATA WRANGLING/CLEANING ----
