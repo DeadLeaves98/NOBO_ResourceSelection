@@ -298,4 +298,8 @@ nobo1 = select(nobo, -"X", -"chick", -"encounter", -"breedingseasonCov", -"Captu
 unique(nobo1$year)
 nrow(nobo1)
 
-# write.csv(nobo2, "./MCP_CleanedTelem.csv")# this file has real vs random points generated for the MCP Scale 
+# write.csv(nobo1, "./MCP_CleanedTelem.csv") # this file has real vs random points generated for the MCP Scale 
+
+###################################################################################
+###################################################################################
+############################### PART3: MODEL - MCP
