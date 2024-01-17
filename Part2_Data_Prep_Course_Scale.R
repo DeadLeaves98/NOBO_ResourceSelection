@@ -8,7 +8,7 @@
 # Read in the "clean" csv for telemetry data from github repository
 library(rgdal); library(raster); library(adehabitatHR); library(rgeos); library(sf); library(dplyr)
 library(lubridate); library(stringr); library(hablar); library(AICcmodavg);  library(lme4); library(lwgeom)
-nobo1 <- read.csv("./cleaned_NOBO_telem.csv")
+nobo1 <- read.csv("./cleaned_Data.csv")
 
 #############################
 ############################# Part 1: Course FORLOOP()----
@@ -16,6 +16,10 @@ nobo1 <- read.csv("./cleaned_NOBO_telem.csv")
 # save Alber's Equal Area Conic projection
 albers <- "+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=37.5 +lon_0=-96 +x_0=0 +y_0=0 +ellps=GRS80 +datum=NAD83 +units=m +no_defs"
 OP <- readOGR("E:/NOBO Project Data/Analyses/Breeding Season/Summer 2022/Adult data/Resource Use/shapefiles/OrtonCourses_JustTreatmentSites.shp")
+
+# Also fix the names in the shapefile
+OP$course <- ifelse(OP$course == "campcrane2", "campcrane", OP$course) # change "campcrane2" to "campcrane"
+OP$course <- ifelse(OP$course == "campcrane1", "campcrane", OP$course) # change "campcrane2" to "campcrane"
 
 # blankDF
 RandomsDF <- data.frame("X" = NA, "Bird.ID" = NA, "ObjectID" = NA, "Date" = NA, "Observer" = NA, 
@@ -32,7 +36,7 @@ for(i in 1:length(unique(nobo1$Bird.ID))){
   # i = 100 # 162.515_220688 
   # subset one bird using the subset function
   nobo_i <- subset(nobo1, Bird.ID == unique(nobo1$Bird.ID)[i]) # randomly subsetting the data and taking the 100th bird'
-   
+  
   # turn nobo_i into spatial. Used for a figure below
   nobo_i_spatial <- SpatialPoints(coords = data.frame("x" = nobo_i$x, "y" = nobo_i$y)) # convert DF to Spatial Points
   crs(nobo_i_spatial) <- CRS("+init=epsg:4326") # define CRS for the spatial points (EPSG 4326 == lat/lon WGS84 etc)
@@ -71,10 +75,10 @@ for(i in 1:length(unique(nobo1$Bird.ID))){
   # progress bar aka DJs child 
   compl <- round(i/length(unique(nobo1$Bird.ID))*15,0)
   cat(paste0("\r [",strrep("🐣", compl), strrep("⚪️", 15-compl),"] ", round(100*i/length(unique(nobo1$Bird.ID)),0), "% complete, bird #", i, " done"))
-  }
+}
 
 
- nrow(nobo1) == nrow(nobo2)/2
+nrow(nobo1) == nrow(nobo2)/2
 
 nobo3 <- rbind(nobo1, nobo2) # if there is 71k pts we should be gucci 
 
@@ -303,8 +307,4 @@ nobo1 = select(nobo, -"X", -"chick", -"encounter", -"breedingseasonCov", -"Captu
 unique(nobo1$year)
 nrow(nobo1)
 
-# write.csv(nobo1, "./Scaledto_Course_CleanedTelem.csv") # this file has real vs random points generated for the MCP Scale 
-
-###################################################################################
-###################################################################################
-############################### PART3: MODEL -
+# write.csv(nobo1, "./ResSelData_Course.csv") # this file has real vs random points generated for the MCP Scale 

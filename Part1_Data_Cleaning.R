@@ -107,11 +107,11 @@ unique(nobo1$Bird.Status)
 length(unique(nobo1$Bird.ID)) #918 -- this is before anything is done
 
 # isolate the broods and remove the nests 
-  # I thought this would be simple but its not
-  # Location.Type and Bird.Status both have 'broods' as an option 
-  # therefore some broods may say the location.type as regular with the bird.status as brood  OR location.type is brood with the bird.status as regular. 
+# I thought this would be simple but its not
+# Location.Type and Bird.Status both have 'broods' as an option 
+# therefore some broods may say the location.type as regular with the bird.status as brood  OR location.type is brood with the bird.status as regular. 
 nobo00 = within(nobo1, Location.Type[Location.Type == 'Regular' & Bird.Status == 'Brood'] <- 'Brood') # within the nobo1 dataset, if the location.type
-  # column says regular but the bird.status column says brood, then change the location.type to brood
+# column says regular but the bird.status column says brood, then change the location.type to brood
 nobo1 = nobo00 # revert it back for ease 
 
 broods = subset(nobo1, Location.Type == "Brood") #subset for broods 
@@ -258,4 +258,4 @@ nobo1 <- subset(nobo1, CentroidCourses != "other")
 unique(nobo1$CentroidCourses)
 
 nrow(nobo1)
-write.csv(nobo1, "./cleaned_NOBO_telem.csv")
+write.csv(nobo1, "./cleaned_Data.csv")

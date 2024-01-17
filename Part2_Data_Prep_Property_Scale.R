@@ -8,8 +8,12 @@
 # Read in the "clean" csv for telemetry data from github repository
 library(rgdal); library(raster); library(adehabitatHR); library(rgeos); library(sf); library(dplyr)
 library(lubridate); library(stringr); library(hablar); library(AICcmodavg);  library(lme4); library(lwgeom)
-nobo1 <- read.csv("./cleaned_NOBO_telem.csv")
+nobo1 <- read.csv("./cleaned_Data.csv")
 OP <- readOGR("E:/NOBO Project Data/Analyses/Breeding Season/Summer 2022/Adult data/Resource Use/shapefiles/OrtonCourses_JustTreatmentSites.shp")
+
+# Also fix the names in the shapefile
+OP$course <- ifelse(OP$course == "campcrane2", "campcrane", OP$course) # change "campcrane2" to "campcrane"
+OP$course <- ifelse(OP$course == "campcrane1", "campcrane", OP$course) # change "campcrane2" to "campcrane"
 
 #############################
 ############################# Part 1: StudySite FORLOOP()----
@@ -300,8 +304,8 @@ nobo1 = select(nobo, -"X", -"chick", -"encounter", -"breedingseasonCov", -"Captu
 
 unique(nobo1$year)
 nrow(nobo1)
-
-# write.csv(nobo1, "./Scaledto_StudySite_CleanedTelem.csv") # this file has real vs random points generated for the MCP Scale 
+# View(nobo1)
+# write.csv(nobo1, "./ResSel_Data.csv") # this file has real vs random points generated for the MCP Scale 
 
 ###################################################################################
 ###################################################################################

@@ -8,7 +8,7 @@
 # Read in the "clean" csv for telemetry data from github repository
 library(rgdal); library(raster); library(adehabitatHR); library(rgeos); library(sf); library(dplyr)
 library(lubridate); library(stringr); library(hablar); library(AICcmodavg);  library(lme4)
-nobo1 <- read.csv("./cleaned_NOBO_telem.csv")
+nobo1 <- read.csv("./cleaned_Data.csv")
 
 # make blank data.frame() to hold randoms
 #nobo2 <- nobo1[0,] # blank data.frame
@@ -19,6 +19,10 @@ nobo1 <- read.csv("./cleaned_NOBO_telem.csv")
 # save Alber's Equal Area Conic projection
 albers <- "+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=37.5 +lon_0=-96 +x_0=0 +y_0=0 +ellps=GRS80 +datum=NAD83 +units=m +no_defs"
 OP <- readOGR("E:/NOBO Project Data/Analyses/Breeding Season/Summer 2022/Adult data/Resource Use/shapefiles/OrtonCourses_JustTreatmentSites.shp")
+
+# Also fix the names in the shapefile
+OP$course <- ifelse(OP$course == "campcrane2", "campcrane", OP$course) # change "campcrane2" to "campcrane"
+OP$course <- ifelse(OP$course == "campcrane1", "campcrane", OP$course) # change "campcrane2" to "campcrane"
 
 # blankDF
 RandomsDF <- data.frame("X" = NA, "Bird.ID" = NA, "ObjectID" = NA, "Date" = NA, "Observer" = NA, 
@@ -199,11 +203,11 @@ nobo.merge1 <- subset(nobo.merge, !is.na(nobo.merge[,"Sex"]))
 nrow(nobo.merge1) # 72561 -- this could be due to birds caught in fall of 2023 may not have trap data 
 #View(nobo.merge1)
 
-  # for now  I am going to leave birds that may not have sex, age, weight 
-  # this is to give us as many pts as possible
-  # and for resource selection I do not thiiinnnkkk I tested against individual cov.. 
-  # which makes me start to question why we even add them... 
-  # whattevvverrrr: should probs come back to this. rip 🪦 
+# for now  I am going to leave birds that may not have sex, age, weight 
+# this is to give us as many pts as possible
+# and for resource selection I do not thiiinnnkkk I tested against individual cov.. 
+# which makes me start to question why we even add them... 
+# whattevvverrrr: should probs come back to this. rip 🪦 
 
 ##### Add Treatment ----
 unique(nobo.merge1$course)
@@ -298,8 +302,4 @@ nobo1 = select(nobo, -"X", -"chick", -"encounter", -"breedingseasonCov", -"Captu
 unique(nobo1$year)
 nrow(nobo1)
 
-# write.csv(nobo1, "./MCP_CleanedTelem.csv") # this file has real vs random points generated for the MCP Scale 
-
-###################################################################################
-###################################################################################
-############################### PART3: MODEL - MCP
+# write.csv(nobo1, "./ResSelData_MCP.csv") # this file has real vs random points generated for the MCP Scale 
