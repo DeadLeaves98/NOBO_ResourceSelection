@@ -211,6 +211,8 @@ RandomsDF <- data.frame("X" = NA, "Bird.ID" = NA, "ObjectID" = NA, "Date" = NA, 
 
 CentroidCourses <- c() # blank object to hold course info
 
+# write.csv(nobo1, "./cleaned_NOBO_telem.csv")
+
 for(i in 1:length(unique(nobo1$Bird.ID))){
   
   # i = 100
@@ -255,4 +257,5 @@ unique(nobo1$CentroidCourses)
 nobo1 <- subset(nobo1, CentroidCourses != "other")
 unique(nobo1$CentroidCourses)
 
+nrow(nobo1)
 write.csv(nobo1, "./cleaned_NOBO_telem.csv")
