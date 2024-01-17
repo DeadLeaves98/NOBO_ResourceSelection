@@ -290,16 +290,22 @@ nobo$DTN_water <- DTN_water_ex
 # View(nobo)
 nrow(nobo)
 
-# Remove Extra columns ---- 
+# make burn stat binary: 0 = burned, 1 = unburned 
+head(nobo)
+nobo$burn_stat <- str_replace(nobo$burn_stat , "no", "1")
+nobo$burn_stat <- str_replace(nobo$burn_stat , "Yes", "0")
 
-names(nobo)
+# Remove Extra columns ---- 
 nobo1 = select(nobo, -"X", -"chick", -"encounter", -"breedingseasonCov", -"Capture.Date", -"Course.ID", -"Trap", 
                -"Band.ID", -"Recapture", -"Immature", -"Condition", -"Leg.Band", -"Wing.Band", -"Tag.Status.at.Capture",
                -"Manufacturer_at_Capture", -"SerialNum_at_Capture", -"Frequency_at_Capture", 
                -"Tag.Status.at.Release", -"Manufacturer_at_Release", -"SerialNum_at_Release", -"Frequency_at_Release",
-               -"Comments", -"ObjectId", -"WingChord", -"Tarsus", -"RadioSize", "bird_id", -"n")
-
-unique(nobo1$year)
-nrow(nobo1)
-
+               -"Comments", -"ObjectId", -"WingChord", -"Tarsus", -"RadioSize", "bird_id", -"n",
+               -"Observer", -"ObjectID", -"Bird.Status", -"Fate", -"year", -"Location.Type", -"Sex",
+               -"Age", -"Weight", -"bird_id", -"treatment", -"CentroidCourses", -"ordinal", -"breedingseason")
+# response: 0 = random, 1 = real 
+# year: 0 = 2022, 1 = 2023 
+# I thinned all columns to the bare minimum so if we want anything we just have to take out what we want from the above code 
+names(nobo1)
+head(nobo1)
 # write.csv(nobo1, "./ResSelData_MCP.csv") # this file has real vs random points generated for the MCP Scale 
