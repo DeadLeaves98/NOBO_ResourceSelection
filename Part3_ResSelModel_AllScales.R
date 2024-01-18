@@ -26,3 +26,25 @@ nobo_Property = read.csv("./ResSelData_Property.csv")
 
 Property_mod = glmer(response ~ scale(DTN_road) + scale(perc_grassy) + scale(perc_bf) + scale(ndvi) +(1|Bird.ID), family = binomial, data = nobo_Property)
 summary(Property_mod)
+
+############################################################################
+
+## ggplot figure 
+## Dot Whisker plot attempt ---- 
+
+library(dotwhisker)
+library(dplyr)
+
+dwplot(Course_mod) # By default, the whiskers span the 95% confidence interval
+
+dwplot(list(MCP_mod, Course_mod, Property_mod),
+       dodge_size = .4,
+       vline = geom_vline(xintercept = 0,colour = "grey8", linetype = 2), 
+       vars_order = c("DTN_road", "perc_grassy", "perc_bf", "ndvi"),) %>%
+       relabel_predictors(
+         c(DTN_road = "Distance to Nearest Road (m)",
+           perc_grassy = "Percent Grassy Cover",
+           perc_bf = "Percent Broodfield",
+           ndvi = "NDVI"))
+       
+help(dwplot)
