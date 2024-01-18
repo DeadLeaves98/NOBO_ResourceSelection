@@ -35,16 +35,34 @@ summary(Property_mod)
 library(dotwhisker)
 library(dplyr)
 
-dwplot(Course_mod) # By default, the whiskers span the 95% confidence interval
+##
 
-dwplot(list(MCP_mod, Course_mod, Property_mod),
-       dodge_size = .4,
-       vline = geom_vline(xintercept = 0,colour = "grey8", linetype = 2), 
-       vars_order = c("DTN_road", "perc_grassy", "perc_bf", "ndvi"),) %>%
-       relabel_predictors(
-         c(DTN_road = "Distance to Nearest Road (m)",
-           perc_grassy = "Percent Grassy Cover",
-           perc_bf = "Percent Broodfield",
-           ndvi = "NDVI"))
-       
-help(dwplot)
+dwplot(Course_mod)
+dwplot(MCP_mod)
+dwplot(Property_mod)# By default, the whiskers span the 95% confidence interval
+help(dwplot) # to see the syntax 
+
+FullYear_mods = list(MCP_mod, Course_mod, Property_mod)
+
+
+
+
+plot1 = dwplot(FullYear_mods,
+               ci = 0.95, 
+               dodge_size = 0.4, # how far apart pts are frome eachother (0.4 = default) 
+               show_intercept = FALSE, 
+               model_order = NULL, 
+               dot_args = list(size = 1.2), 
+               vline = geom_vline(xintercept = 0, linetype = 2, colour ="grey8")) 
+# It works until this point 
+# continue fixing plots----
++
+    relabel_predictors(
+      c(
+        scale(DTN_road) = "Distance to Nearest Road (m)",
+        scale(perc_grassy) = "Percent Grassy Cover",
+        scale(perc_bf) = "Percent Broodfield",
+        scale(ndvi) = "NDVI"
+      )
+    )
+######################################################
