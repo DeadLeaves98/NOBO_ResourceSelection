@@ -44,9 +44,6 @@ help(dwplot) # to see the syntax
 
 FullYear_mods = list(MCP_mod, Course_mod, Property_mod)
 
-
-
-
 plot1 = dwplot(FullYear_mods,
                ci = 0.95, 
                dodge_size = 0.4, # how far apart pts are frome eachother (0.4 = default) 
