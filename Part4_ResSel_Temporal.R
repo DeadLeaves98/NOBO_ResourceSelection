@@ -229,7 +229,114 @@ month2_interval_facet = dwplot(list(jf_mod, ma_mod, mj_mod, ja_mod, so_mod, nd_m
 
 
 
+##### Course -> 1 month intervals ####
+nobo_c = read.csv("./ResSelData_Course.csv") # read in the course level data 
+nobo_c[,11:22] <- scale(nobo_c[,11:22]) # scale all the variables
 
+
+# January  
+jan_22 = nobo_c[nobo_c$Date >= "2022-01-01" & nobo_c$Date <= "2022-01-31", ]
+jan_23 = nobo_c[nobo_c$Date >= "2023-01-01" & nobo_c$Date <= "2023-01-31", ]
+jan = rbind(jan_22, jan_23)
+nrow(jan) # 6177
+
+
+# February   
+feb_22 = nobo_c[nobo_c$Date >= "2022-02-01" & nobo_c$Date <= "2022-02-31", ]
+feb_23 = nobo_c[nobo_c$Date >= "2023-02-01" & nobo_c$Date <= "2023-02-31", ]
+feb = rbind(feb_22, feb_23)
+nrow(feb) # 5268
+
+# March   
+mar_22 = nobo_c[nobo_c$Date >= "2022-03-01" & nobo_c$Date <= "2022-03-31", ]
+mar_23 = nobo_c[nobo_c$Date >= "2023-03-01" & nobo_c$Date <= "2023-03-31", ]
+mar = rbind(mar_22, mar_23)
+nrow(mar) # 2283
+
+# April  
+apr_22 = nobo_c[nobo_c$Date >= "2022-04-01" & nobo_c$Date <= "2022-04-31", ]
+apr_23 = nobo_c[nobo_c$Date >= "2023-04-01" & nobo_c$Date <= "2023-04-31", ]
+apr = rbind(apr_22, apr_23)
+nrow(apr) # 5493
+
+# May  
+may_22 = nobo_c[nobo_c$Date >= "2022-05-01" & nobo_c$Date <= "2022-05-31", ]
+may_23 = nobo_c[nobo_c$Date >= "2023-05-01" & nobo_c$Date <= "2023-05-31", ]
+may = rbind(may_22, may_23)
+nrow(may) # 7230
+
+# June  
+jun_22 = nobo_c[nobo_c$Date >= "2022-06-01" & nobo_c$Date <= "2022-06-31", ]
+jun_23 = nobo_c[nobo_c$Date >= "2023-06-01" & nobo_c$Date <= "2023-06-31", ]
+jun = rbind(jun_22, jun_23)
+nrow(jun) # 14634
+
+# July  
+jul_22 = nobo_c[nobo_c$Date >= "2022-07-01" & nobo_c$Date <= "2022-07-31", ]
+jul_23 = nobo_c[nobo_c$Date >= "2023-07-01" & nobo_c$Date <= "2023-07-31", ]
+jul = rbind(jul_22, jul_23)
+nrow(jul) # 12666
+
+# August  
+aug_22 = nobo_c[nobo_c$Date >= "2022-08-01" & nobo_c$Date <= "2022-08-31", ]
+aug_23 = nobo_c[nobo_c$Date >= "2023-08-01" & nobo_c$Date <= "2023-08-31", ]
+aug = rbind(aug_22, aug_23)
+nrow(aug) # 8946
+
+# September   
+sept_22 = nobo_c[nobo_c$Date >= "2022-09-01" & nobo_c$Date <= "2022-09-31", ]
+sept_23 = nobo_c[nobo_c$Date >= "2023-09-01" & nobo_c$Date <= "2023-09-31", ]
+sept = rbind(sept_22, sept_23)
+nrow(sept) # 5766
+
+# October  
+oct_22 = nobo_c[nobo_c$Date >= "2022-10-01" & nobo_c$Date <= "2022-10-31", ]
+oct_23 = nobo_c[nobo_c$Date >= "2023-10-01" & nobo_c$Date <= "2023-10-31", ]
+oct = rbind(oct_22, oct_23)
+nrow(oct) # 2904
+
+# November   
+nov_22 = nobo_c[nobo_c$Date >= "2022-11-01" & nobo_c$Date <= "2022-11-31", ]
+nov_23 = nobo_c[nobo_c$Date >= "2023-11-01" & nobo_c$Date <= "2023-11-31", ]
+nov = rbind(nov_22, nov_23)
+nrow(nov) # 516
+
+# December   
+dec_22 = nobo_c[nobo_c$Date >= "2022-12-01" & nobo_c$Date <= "2022-12-31", ]
+dec_23 = nobo_c[nobo_c$Date >= "2023-12-01" & nobo_c$Date <= "2023-12-31", ]
+dec = rbind(dec_22, dec_23)
+nrow(dec) # 678
+
+#### Models --> Months ----
+jan_mod = glmer(response ~ DTN_road + perc_grassy + perc_bf + ndvi +(1|Bird.ID), family = binomial, data = jan)
+feb_mod = glmer(response ~ DTN_road + perc_grassy + perc_bf + ndvi +(1|Bird.ID), family = binomial, data = feb)
+mar_mod = glmer(response ~ DTN_road + perc_grassy + perc_bf + ndvi +(1|Bird.ID), family = binomial, data = mar)
+apr_mod = glmer(response ~ DTN_road + perc_grassy + perc_bf + ndvi +(1|Bird.ID), family = binomial, data = apr)
+may_mod = glmer(response ~ DTN_road + perc_grassy + perc_bf + ndvi +(1|Bird.ID), family = binomial, data = may)
+jun_mod = glmer(response ~ DTN_road + perc_grassy + perc_bf + ndvi +(1|Bird.ID), family = binomial, data = jun)
+jul_mod = glmer(response ~ DTN_road + perc_grassy + perc_bf + ndvi +(1|Bird.ID), family = binomial, data = jul)
+aug_mod = glmer(response ~ DTN_road + perc_grassy + perc_bf + ndvi +(1|Bird.ID), family = binomial, data = aug)
+sept_mod = glmer(response ~ DTN_road + perc_grassy + perc_bf + ndvi +(1|Bird.ID), family = binomial, data = sept)
+oct_mod = glmer(response ~ DTN_road + perc_grassy + perc_bf + ndvi +(1|Bird.ID), family = binomial, data = oct)
+nov_mod = glmer(response ~ DTN_road + perc_grassy + perc_bf + ndvi +(1|Bird.ID), family = binomial, data = nov)
+dec_mod = glmer(response ~ DTN_road + perc_grassy + perc_bf + ndvi +(1|Bird.ID), family = binomial, data = dec)
+
+# make a list to hold the mods 
+month_mod = list(jan_mod, feb_mod, mar_mod, apr_mod, may_mod, jun_mod, jul_mod, aug_mod, sept_mod, oct_mod, nov_mod, dec_mod)
+
+
+Fig4_months = dwplot(month_mod)
+# dot whisker plot with editing 
+Fig4_months = dwplot(month_mod,
+                       ci = 0.95, 
+                       dodge_size = 0.4, # how far apart pts are frome eachother (0.4 = default) 
+                       show_intercept = FALSE, 
+                       model_order = NULL, 
+                       dot_args = list(size = 3), 
+                       vline = geom_vline(xintercept = 0, linetype = 2, colour ="grey8"), 
+                       vars_order = c("DTN_road", "perc_grassy", "perc_bf", "ndvi") +
+                       theme_bw() + xlab("Coefficient Estimate") + ylab("")) %>% 
+  scale_color_discrete(name = "Model", labels = c("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sept", "Oct", "Nov", "Dec"))
 
 ###############################################################################
 ################################################################################
@@ -300,6 +407,8 @@ nrow(nonbreeding) # 17826
 ##### Models: breeding vs nonbreeding  #### 
 library(dotwhisker)
 library(dplyr)
+install.packages("merDeriv")
+library(merDeriv)
 # attempting to scale first then put in the model to be able to adjust var names using dwplot() 
 road_sc_nb = scale(nonbreeding$DTN_road)
 grassy_sc_nb = scale(nonbreeding$perc_grassy)
