@@ -24,6 +24,7 @@
 ##############################################################################
 
 nobo_c = read.csv("./ResSelData_Course.csv") # read in the course level data 
+nobo_c[,11:22] <- scale(nobo_c[,11:22]) # scale all the variables
 
 ##### Breeding vs nonbreeding -- COURSE ####
 
@@ -41,11 +42,10 @@ nonbreeding = rbind(non_breeding1, non_breeding2, non_breeding3)
 nrow(nonbreeding) # 17826
 
 ##### Models: breeding vs nonbreeding  #### 
-library(dotwhisker)
-library(dplyr)
+library(dotwhisker); library(dplyr); library(lme4)
 
-nonbreeding_mod = glmer(response ~ scale(DTN_road) + scale(perc_grassy) + scale(perc_bf) + scale(ndvi) +(1|Bird.ID), family = binomial, data = nonbreeding)
-breeding_mod = glmer(response ~ scale(DTN_road) + scale(perc_grassy) + scale(perc_bf) + scale(ndvi) +(1|Bird.ID), family = binomial, data = breeding)
+nonbreeding_mod = glmer(response ~ DTN_road + perc_grassy + perc_bf + ndvi +(1|Bird.ID), family = binomial, data = nonbreeding)
+breeding_mod = glmer(response ~ DTN_road + perc_grassy + perc_bf + ndvi +(1|Bird.ID), family = binomial, data = breeding)
 summary(nonbreeding_mod)
 
 # A basic dot whisker plot without editing anything 
@@ -60,20 +60,23 @@ Fig1_biannual = dwplot(bi_annual_mods,
                       dodge_size = 0.4, # how far apart pts are frome eachother (0.4 = default) 
                       show_intercept = FALSE, 
                       model_order = NULL, 
-                      dot_args = list(size = 1.2), 
+                      dot_args = list(size = 3), 
                       vline = geom_vline(xintercept = 0, linetype = 2, colour ="grey8"), 
-                      vars_order = c("scale(DTN_road)", "scale(perc_grassy)", "scale(perc_bf)", "scale(ndvi)")) +
-  theme_bw() + xlab("Coefficient Estimate") + ylab("")
+                      vars_order = c("DTN_road", "perc_grassy", "perc_bf", "ndvi")) +
+  theme_bw() + xlab("Coefficient Estimate") + ylab("") + 
+  scale_color_discrete(name = "Model", labels = c("NB", "Br"))
+
 Fig1_biannual
+
 # Facet dot whisker plot 
 Fig1_biannual_facet = dwplot(bi_annual_mods, 
                ci = 0.95, 
                dodge_size = 0.4, # how far apart pts are frome eachother (0.4 = default) 
                show_intercept = FALSE, 
                model_order = NULL, 
-               dot_args = list(size = 1.2), 
+               dot_args = list(size = 3), 
                vline = geom_vline(xintercept = 0, linetype = 2, colour ="grey8"), 
-               vars_order = c("scale(DTN_road)", "scale(perc_grassy)", "scale(perc_bf)", "scale(ndvi)"),
+               vars_order = c("DTN_road", "perc_grassy", "perc_bf", "ndvi"),
 ) +
   facet_grid(~model, scales="free_y") +
   theme_bw() + xlab("Coefficient Estimate") + ylab("") 
@@ -87,6 +90,7 @@ Fig1_biannual_facet
 
 # Already ran this in but just in case 
 nobo_c = read.csv("./ResSelData_Course.csv") # read in the course level data 
+nobo_c[,11:22] <- scale(nobo_c[,11:22]) # scale all the variables
 
 ##### course ->Breeding vs nonbreeding ####
 
@@ -128,7 +132,7 @@ ci = 0.95,
 dodge_size = 0.4, # how far apart pts are frome eachother (0.4 = default) 
 show_intercept = FALSE, 
 model_order = NULL, 
-dot_args = list(size = 1.2), 
+dot_args = list(size = 3), 
 vline = geom_vline(xintercept = 0, linetype = 2, colour ="grey8"), 
 vars_order = c("scale(DTN_road)", "scale(perc_grassy)", "scale(perc_bf)", "scale(ndvi)")) +
   theme_bw() + xlab("Coefficient Estimate") + ylab("")
@@ -204,17 +208,19 @@ month2_interval = dwplot(list(jf_mod, ma_mod, mj_mod, ja_mod, so_mod, nd_mod),
               dodge_size = 0.4, # how far apart pts are frome eachother (0.4 = default) 
               show_intercept = FALSE, 
               model_order = NULL, 
-              dot_args = list(size = 1.2), 
+              dot_args = list(size = 3), 
               vline = geom_vline(xintercept = 0, linetype = 2, colour ="grey8"), 
               vars_order = c("scale(DTN_road)", "scale(perc_grassy)", "scale(perc_bf)", "scale(ndvi)")) +
   theme_bw() + xlab("Coefficient Estimate") + ylab("")
+
+month2_interval
 
 month2_interval_facet = dwplot(list(jf_mod, ma_mod, mj_mod, ja_mod, so_mod, nd_mod), 
   ci = 0.95, 
   dodge_size = 0.4, # how far apart pts are frome eachother (0.4 = default) 
   show_intercept = FALSE, 
   model_order = NULL, 
-  dot_args = list(size = 1.2), 
+  dot_args = list(size = 3), 
   vline = geom_vline(xintercept = 0, linetype = 2, colour ="grey8"), 
   vars_order = c("scale(DTN_road)", "scale(perc_grassy)", "scale(perc_bf)", "scale(ndvi)"),
   ) +
