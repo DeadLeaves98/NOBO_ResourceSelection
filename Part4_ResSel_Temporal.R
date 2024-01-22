@@ -11,7 +11,8 @@
 # 1. Annual (done) 
 # 2. Bi-Annual: Breeding vs Nonbreeding 
 # 3. Seasonal: Spring, Summer, Fall, Winter
-# 4. 2 month intervals: jan-feb, mar-apr, etc... 
+# 4. 2 month intervals: jan-feb, mar-apr,
+# 5. 1 month interval  
 
 # This will be using the Course Scaled data 
 # This can easily be changed, but it seemed that the home range scale (MCP) had the 
@@ -25,6 +26,55 @@
 
 nobo_c = read.csv("./ResSelData_Course.csv") # read in the course level data 
 nobo_c[,11:22] <- scale(nobo_c[,11:22]) # scale all the variables
+
+Course_mod = glmer(response ~ DTN_road + perc_grassy + perc_bf + ndvi +(1|Bird.ID), family = binomial, data = nobo_Course)
+summary(Course_mod)
+
+# Annual 
+#     breeding data subset
+annual22 <- nobo_c[nobo_c$Date >= "2022-01-01" & nobo_c$Date <= "2022-12-31", ]
+annual23 <- nobo_c[nobo_c$Date >= "2023-01-01" & nobo_c$Date <= "2023-12-31", ]
+nrow(annual22) # 35664
+nrow(annual23) # 36897
+
+##### Models: Annual Comparison 2022 vs 2023  #### 
+library(dotwhisker); library(dplyr); library(lme4)
+
+annual22_mod = glmer(response ~ DTN_road + perc_grassy + perc_bf + ndvi +(1|Bird.ID), family = binomial, data = annual22)
+annual23_mod = glmer(response ~ DTN_road + perc_grassy + perc_bf + ndvi +(1|Bird.ID), family = binomial, data = annual23)
+summary(annual22_mod)
+summary(annual23_mod)
+confint(annual22_mod)
+
+# (st error * 1.96) + or - to estimate 
+
+(0.01682 * 1.96) + -0.68398
+(0.01682 * 1.96) - -0.68398
+
+year_mods = list(annual22_mod, annual23_mod)
+# Annual using the "course" scale 
+Fig6_ResSel_Annual = dwplot(year_mods,
+                                ci = 0.95, 
+                                dodge_size = 0.4, # how far apart pts are frome eachother (0.4 = default) 
+                                show_intercept = FALSE, 
+                                model_order = NULL, 
+                                dot_args = list(size = 3), 
+                                vline = geom_vline(xintercept = 0, linetype = 2, colour ="grey8"), 
+                                vars_order = c("DTN_road", "perc_grassy", "perc_bf", "ndvi")) %>% # plot line at zero _behind_coefs
+  relabel_predictors(
+    c(
+      DTN_road = "Distance to Nearest Road",
+      perc_grassy = "Percent Grassy",
+      perc_bf = "Percent Broodfield",
+      ndvi = "NDVI")
+  ) +
+  
+  theme_bw() + xlab("Coefficient Estimate") + ylab("") + 
+  scale_color_discrete(name = "Model", labels = c("Year 2022", "Year 2023"))
+ Fig6_ResSel_Annual
+
+
+
 
 ##### Breeding vs nonbreeding -- COURSE ####
 
@@ -46,6 +96,7 @@ library(dotwhisker); library(dplyr); library(lme4)
 
 nonbreeding_mod = glmer(response ~ DTN_road + perc_grassy + perc_bf + ndvi +(1|Bird.ID), family = binomial, data = nonbreeding)
 breeding_mod = glmer(response ~ DTN_road + perc_grassy + perc_bf + ndvi +(1|Bird.ID), family = binomial, data = breeding)
+summary(breeding_mod)
 summary(nonbreeding_mod)
 
 # A basic dot whisker plot without editing anything 
@@ -62,11 +113,18 @@ Fig1_biannual = dwplot(bi_annual_mods,
                       model_order = NULL, 
                       dot_args = list(size = 3), 
                       vline = geom_vline(xintercept = 0, linetype = 2, colour ="grey8"), 
-                      vars_order = c("DTN_road", "perc_grassy", "perc_bf", "ndvi")) +
+                      vars_order = c("DTN_road", "perc_grassy", "perc_bf", "ndvi")) %>% # plot line at zero _behind_coefs
+  relabel_predictors(
+    c(
+      DTN_road = "Distance to Nearest Road",
+      perc_grassy = "Percent Grassy",
+      perc_bf = "Percent Broodfield",
+      ndvi = "NDVI")
+  ) +
+  
   theme_bw() + xlab("Coefficient Estimate") + ylab("") + 
-  scale_color_discrete(name = "Model", labels = c("NB", "Br"))
+  scale_color_discrete(name = "Model", labels = c("NonBreeding", "Breeding"))
 
-Fig1_biannual
 
 # Facet dot whisker plot 
 Fig1_biannual_facet = dwplot(bi_annual_mods, 
@@ -122,22 +180,45 @@ winter = rbind(winter22, winter23)
 
 ##### Models: SEASON  #### 
 
-spring_mod = glmer(response ~ scale(DTN_road) + scale(perc_grassy) + scale(perc_bf) + scale(ndvi) +(1|Bird.ID), family = binomial, data = spring)
-summer_mod = glmer(response ~ scale(DTN_road) + scale(perc_grassy) + scale(perc_bf) + scale(ndvi) +(1|Bird.ID), family = binomial, data = summer)
-fall_mod = glmer(response ~ scale(DTN_road) + scale(perc_grassy) + scale(perc_bf) + scale(ndvi) +(1|Bird.ID), family = binomial, data = fall)
-winter_mod = glmer(response ~ scale(DTN_road) + scale(perc_grassy) + scale(perc_bf) + scale(ndvi) +(1|Bird.ID), family = binomial, data = winter)
+spring_mod = glmer(response ~ DTN_road + perc_grassy + perc_bf + ndvi +(1|Bird.ID), family = binomial, data = spring)
+summer_mod = glmer(response ~ DTN_road + perc_grassy + perc_bf + ndvi +(1|Bird.ID), family = binomial, data = summer)
+fall_mod = glmer(response ~ DTN_road + perc_grassy + perc_bf + ndvi +(1|Bird.ID), family = binomial, data = fall)
+winter_mod = glmer(response ~ DTN_road + perc_grassy + perc_bf + ndvi +(1|Bird.ID), family = binomial, data = winter)
 
-Fig_season = dwplot(list(spring_mod, summer_mod, fall_mod, winter_mod),
-ci = 0.95, 
-dodge_size = 0.4, # how far apart pts are frome eachother (0.4 = default) 
-show_intercept = FALSE, 
-model_order = NULL, 
-dot_args = list(size = 3), 
-vline = geom_vline(xintercept = 0, linetype = 2, colour ="grey8"), 
-vars_order = c("scale(DTN_road)", "scale(perc_grassy)", "scale(perc_bf)", "scale(ndvi)")) +
-  theme_bw() + xlab("Coefficient Estimate") + ylab("")
-Fig_season # pulls up the fig
+summary(spring_mod)
+summary(summer_mod)
+summary(fall_mod)
+summary(winter_mod)
 
+
+season_mod = list(spring_mod, summer_mod, fall_mod, winter_mod)
+
+# dot whisker plot with editing 
+
+dwplot(list(spring_mod, summer_mod, fall_mod, winter_mod))
+
+
+Fig2_seasonal = dwplot(list(spring_mod, summer_mod, fall_mod, winter_mod),
+                       ci = 0.95, 
+                       dodge_size = 0.4, # how far apart pts are frome eachother (0.4 = default) 
+                       show_intercept = FALSE, 
+                       model_order = NULL, 
+                       dot_args = list(size = 3), 
+                       vline = geom_vline(xintercept = 0, linetype = 2, colour ="grey8"), 
+                       vars_order = c("DTN_road", "perc_grassy", "perc_bf", "ndvi")) %>% # plot line at zero _behind_coefs
+  relabel_predictors(
+    c(
+      DTN_road = "Distance to Nearest Road",
+      perc_grassy = "Percent Grassy",
+      perc_bf = "Percent Broodfield",
+      ndvi = "NDVI")
+  ) +
+  
+  theme_bw() + xlab("Coefficient Estimate") + ylab("") + 
+  scale_color_discrete(name = "Model", labels = c("Spring", "Summer", "Fall", "Winter"))
+Fig2_seasonal
+
+# Facetted by seasonal model ----
 Fig_season_facet = dwplot(list(spring_mod, summer_mod, fall_mod, winter_mod), 
               ci = 0.95, 
               dodge_size = 0.4, # how far apart pts are frome eachother (0.4 = default) 
@@ -155,7 +236,9 @@ Fig_season_facet # pulls up the fig
 ###################################################################################
 ###################################################################################
 
-
+# Already ran this in but just in case 
+nobo_c = read.csv("./ResSelData_Course.csv") # read in the course level data 
+nobo_c[,11:22] <- scale(nobo_c[,11:22]) # scale all the variables
 ##### Course -> 2 month intervals ####
 
 # January - February 
@@ -196,24 +279,45 @@ nrow(nd) # 21612
 
 ##### Models: 2 month intervals  #### 
 
-jf_mod = glmer(response ~ scale(DTN_road) + scale(perc_grassy) + scale(perc_bf) + scale(ndvi) +(1|Bird.ID), family = binomial, data = jf)
-ma_mod = glmer(response ~ scale(DTN_road) + scale(perc_grassy) + scale(perc_bf) + scale(ndvi) +(1|Bird.ID), family = binomial, data = ma)
-mj_mod = glmer(response ~ scale(DTN_road) + scale(perc_grassy) + scale(perc_bf) + scale(ndvi) +(1|Bird.ID), family = binomial, data = mj)
-ja_mod = glmer(response ~ scale(DTN_road) + scale(perc_grassy) + scale(perc_bf) + scale(ndvi) +(1|Bird.ID), family = binomial, data = ja)
-so_mod = glmer(response ~ scale(DTN_road) + scale(perc_grassy) + scale(perc_bf) + scale(ndvi) +(1|Bird.ID), family = binomial, data = so)
-nd_mod = glmer(response ~ scale(DTN_road) + scale(perc_grassy) + scale(perc_bf) + scale(ndvi) +(1|Bird.ID), family = binomial, data = nd)
+jf_mod = glmer(response ~ DTN_road + perc_grassy + perc_bf + ndvi +(1|Bird.ID), family = binomial, data = jf)
+ma_mod = glmer(response ~ DTN_road + perc_grassy + perc_bf + ndvi +(1|Bird.ID), family = binomial, data = ma)
+mj_mod = glmer(response ~ DTN_road + perc_grassy + perc_bf + ndvi +(1|Bird.ID), family = binomial, data = mj)
+ja_mod = glmer(response ~ DTN_road + perc_grassy + perc_bf + ndvi +(1|Bird.ID), family = binomial, data = ja)
+so_mod = glmer(response ~ DTN_road + perc_grassy + perc_bf + ndvi +(1|Bird.ID), family = binomial, data = so)
+nd_mod = glmer(response ~ DTN_road + perc_grassy + perc_bf + ndvi +(1|Bird.ID), family = binomial, data = nd)
 
-month2_interval = dwplot(list(jf_mod, ma_mod, mj_mod, ja_mod, so_mod, nd_mod),
-              ci = 0.95, 
-              dodge_size = 0.4, # how far apart pts are frome eachother (0.4 = default) 
-              show_intercept = FALSE, 
-              model_order = NULL, 
-              dot_args = list(size = 3), 
-              vline = geom_vline(xintercept = 0, linetype = 2, colour ="grey8"), 
-              vars_order = c("scale(DTN_road)", "scale(perc_grassy)", "scale(perc_bf)", "scale(ndvi)")) +
-  theme_bw() + xlab("Coefficient Estimate") + ylab("")
 
-month2_interval
+
+summary(jf_mod)
+summary(ma_mod)
+summary(mj_mod)
+summary(ja_mod)
+summary(so_mod)
+summary(nd_mod)
+
+month_2interv_mods = list(jf_mod, ma_mod, mj_mod, ja_mod, so_mod, nd_mod)
+
+Fig3_month_2interv = dwplot(month_2interv_mods,
+                       ci = 0.95, 
+                       dodge_size = 0.4, # how far apart pts are frome eachother (0.4 = default) 
+                       show_intercept = FALSE, 
+                       model_order = NULL, 
+                       dot_args = list(size = 3), 
+                       vline = geom_vline(xintercept = 0, linetype = 2, colour ="grey8"), 
+                       vars_order = c("DTN_road", "perc_grassy", "perc_bf", "ndvi")) %>% # plot line at zero _behind_coefs
+  relabel_predictors(
+    c(
+      DTN_road = "Distance to Nearest Road",
+      perc_grassy = "Percent Grassy",
+      perc_bf = "Percent Broodfield",
+      ndvi = "NDVI")
+  ) +
+  
+  theme_bw() + xlab("Coefficient Estimate") + ylab("") + 
+  scale_color_discrete(name = "Model", labels = c("Jan-Feb", "Mar-Apr", "May-Jun", "Jul-Aug", 
+                                                  "Sep-Oct", "Nov-Dec"))
+Fig3_month_2interv 
+
 
 month2_interval_facet = dwplot(list(jf_mod, ma_mod, mj_mod, ja_mod, so_mod, nd_mod), 
   ci = 0.95, 
@@ -321,22 +425,50 @@ oct_mod = glmer(response ~ DTN_road + perc_grassy + perc_bf + ndvi +(1|Bird.ID),
 nov_mod = glmer(response ~ DTN_road + perc_grassy + perc_bf + ndvi +(1|Bird.ID), family = binomial, data = nov)
 dec_mod = glmer(response ~ DTN_road + perc_grassy + perc_bf + ndvi +(1|Bird.ID), family = binomial, data = dec)
 
+summary(jan_mod)
+summary(feb_mod)
+summary(mar_mod)
+summary(apr_mod)
+summary(may_mod)
+summary(jun_mod)
+summary(jul_mod)
+summary(aug_mod)
+summary(sept_mod)
+summary(oct_mod)
+summary(nov_mod)
+summary(dec_mod)
+
+
+
+
+
+
 # make a list to hold the mods 
 month_mod = list(jan_mod, feb_mod, mar_mod, apr_mod, may_mod, jun_mod, jul_mod, aug_mod, sept_mod, oct_mod, nov_mod, dec_mod)
 
+Fig4_month = dwplot(month_mod,
+                            ci = 0.95, 
+                            dodge_size = 0.4, # how far apart pts are frome eachother (0.4 = default) 
+                            show_intercept = FALSE, 
+                            model_order = NULL, 
+                            dot_args = list(size = 3), 
+                            vline = geom_vline(xintercept = 0, linetype = 2, colour ="grey8"), 
+                            vars_order = c("DTN_road", "perc_grassy", "perc_bf", "ndvi")) %>% # plot line at zero _behind_coefs
+  relabel_predictors(
+    c(
+      DTN_road = "Distance to Nearest Road",
+      perc_grassy = "Percent Grassy",
+      perc_bf = "Percent Broodfield",
+      ndvi = "NDVI")
+  ) +
+  
+  theme_bw() + xlab("Coefficient Estimate") + ylab("") + 
+  scale_color_discrete(name = "Model", labels = c("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", 
+                                                  "Sep", "Oct", "Nov", "Dec"))
 
-Fig4_months = dwplot(month_mod)
-# dot whisker plot with editing 
-Fig4_months = dwplot(month_mod,
-                       ci = 0.95, 
-                       dodge_size = 0.4, # how far apart pts are frome eachother (0.4 = default) 
-                       show_intercept = FALSE, 
-                       model_order = NULL, 
-                       dot_args = list(size = 3), 
-                       vline = geom_vline(xintercept = 0, linetype = 2, colour ="grey8"), 
-                       vars_order = c("DTN_road", "perc_grassy", "perc_bf", "ndvi") +
-                       theme_bw() + xlab("Coefficient Estimate") + ylab("")) %>% 
-  scale_color_discrete(name = "Model", labels = c("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sept", "Oct", "Nov", "Dec"))
+Fig4_month
+
+
 
 ###############################################################################
 ################################################################################
