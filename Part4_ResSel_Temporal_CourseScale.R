@@ -7,8 +7,8 @@
 
 # Goal:
 # We have already run the full year with all the data. 
-# I want to split the data up based on 2 other temporal scales: 
-# 1. Annual (done) 
+# I want to split the data up based on 5 temporal scales: 
+# 1. Annual
 # 2. Bi-Annual: Breeding vs Nonbreeding 
 # 3. Seasonal: Spring, Summer, Fall, Winter
 # 4. 2 month intervals: jan-feb, mar-apr,
@@ -23,34 +23,36 @@
 # Maybe this is not a sound thought process -- we should discuss 
 
 ##############################################################################
-
+# COURSE ----
 nobo_c = read.csv("./ResSelData_Course.csv") # read in the course level data 
 nobo_c[,11:22] <- scale(nobo_c[,11:22]) # scale all the variables
 
-Course_mod = glmer(response ~ DTN_road + perc_grassy + perc_bf + ndvi +(1|Bird.ID), family = binomial, data = nobo_Course)
+## models ----
+Course_mod = glmer(response ~ DTN_road + perc_grassy + perc_bf + ndvi +(1|Bird.ID), family = binomial, data = nobo_c)
 summary(Course_mod)
 
-# Annual 
+# ANNUAL ----
+nobo_c = read.csv("./ResSelData_Course.csv") # read in the course level data 
+nobo_c[,11:22] <- scale(nobo_c[,11:22]) # scale all the variables
+
+
 #     breeding data subset
 annual22 <- nobo_c[nobo_c$Date >= "2022-01-01" & nobo_c$Date <= "2022-12-31", ]
 annual23 <- nobo_c[nobo_c$Date >= "2023-01-01" & nobo_c$Date <= "2023-12-31", ]
 nrow(annual22) # 35664
 nrow(annual23) # 36897
 
-##### Models: Annual Comparison 2022 vs 2023  #### 
+## Models ----
 library(dotwhisker); library(dplyr); library(lme4)
 
 annual22_mod = glmer(response ~ DTN_road + perc_grassy + perc_bf + ndvi +(1|Bird.ID), family = binomial, data = annual22)
 annual23_mod = glmer(response ~ DTN_road + perc_grassy + perc_bf + ndvi +(1|Bird.ID), family = binomial, data = annual23)
 summary(annual22_mod)
 summary(annual23_mod)
-confint(annual22_mod)
-
 # (st error * 1.96) + or - to estimate 
 
-(0.01682 * 1.96) + -0.68398
-(0.01682 * 1.96) - -0.68398
 
+## Figure ----
 year_mods = list(annual22_mod, annual23_mod)
 # Annual using the "course" scale 
 Fig6_ResSel_Annual = dwplot(year_mods,
@@ -74,9 +76,7 @@ Fig6_ResSel_Annual = dwplot(year_mods,
  Fig6_ResSel_Annual
 
 
-
-
-##### Breeding vs nonbreeding -- COURSE ####
+# B VS NB ####
 
 #     breeding data subset
 breeding22 <- nobo_c[nobo_c$Date >= "2022-04-01" & nobo_c$Date <= "2022-09-30", ]
@@ -91,13 +91,16 @@ non_breeding3 = nobo_c[nobo_c$Date >= "2023-10-01" & nobo_c$Date <= "2023-12-31"
 nonbreeding = rbind(non_breeding1, non_breeding2, non_breeding3)
 nrow(nonbreeding) # 17826
 
-##### Models: breeding vs nonbreeding  #### 
+## Models ---- 
 library(dotwhisker); library(dplyr); library(lme4)
 
 nonbreeding_mod = glmer(response ~ DTN_road + perc_grassy + perc_bf + ndvi +(1|Bird.ID), family = binomial, data = nonbreeding)
 breeding_mod = glmer(response ~ DTN_road + perc_grassy + perc_bf + ndvi +(1|Bird.ID), family = binomial, data = breeding)
 summary(breeding_mod)
 summary(nonbreeding_mod)
+
+
+## Figure ----
 
 # A basic dot whisker plot without editing anything 
 Fig1 = dwplot(list(breeding_mod, nonbreeding_mod))
@@ -123,7 +126,7 @@ Fig1_biannual = dwplot(bi_annual_mods,
   ) +
   
   theme_bw() + xlab("Coefficient Estimate") + ylab("") + 
-  scale_color_discrete(name = "Model", labels = c("NonBreeding", "Breeding"))
+  scale_color_discrete(name = "Model", labels = c("Breeding", "Non-breeding"))
 
 
 # Facet dot whisker plot 
@@ -144,13 +147,11 @@ Fig1_biannual_facet
 ###################################################################################
 ###################################################################################
 
-#### Seasons: Spring, Summer, Fall, Winter 
+#SEASON ---- 
 
 # Already ran this in but just in case 
 nobo_c = read.csv("./ResSelData_Course.csv") # read in the course level data 
 nobo_c[,11:22] <- scale(nobo_c[,11:22]) # scale all the variables
-
-##### course ->Breeding vs nonbreeding ####
 
 # Meteorological Seasons
 # spring runs from March 1 to May 31; summer runs from June 1 to August 31; fall
@@ -178,7 +179,7 @@ winter23 = nobo_c[nobo_c$Date >= "2023-12-01" & nobo_c$Date <= "2024-02-28", ]
 winter = rbind(winter22, winter23)
 
 
-##### Models: SEASON  #### 
+## Models  #### 
 
 spring_mod = glmer(response ~ DTN_road + perc_grassy + perc_bf + ndvi +(1|Bird.ID), family = binomial, data = spring)
 summer_mod = glmer(response ~ DTN_road + perc_grassy + perc_bf + ndvi +(1|Bird.ID), family = binomial, data = summer)
@@ -190,7 +191,7 @@ summary(summer_mod)
 summary(fall_mod)
 summary(winter_mod)
 
-
+## Figure ----
 season_mod = list(spring_mod, summer_mod, fall_mod, winter_mod)
 
 # dot whisker plot with editing 
@@ -218,28 +219,14 @@ Fig2_seasonal = dwplot(list(spring_mod, summer_mod, fall_mod, winter_mod),
   scale_color_discrete(name = "Model", labels = c("Spring", "Summer", "Fall", "Winter"))
 Fig2_seasonal
 
-# Facetted by seasonal model ----
-Fig_season_facet = dwplot(list(spring_mod, summer_mod, fall_mod, winter_mod), 
-              ci = 0.95, 
-              dodge_size = 0.4, # how far apart pts are frome eachother (0.4 = default) 
-              show_intercept = FALSE, 
-              model_order = NULL, 
-              dot_args = list(size = 1.2), 
-              vline = geom_vline(xintercept = 0, linetype = 2, colour ="grey8"), 
-              vars_order = c("scale(DTN_road)", "scale(perc_grassy)", "scale(perc_bf)", "scale(ndvi)"),
-) +
-  facet_grid(~model, scales="free_y") +
-  theme_bw() + xlab("Coefficient Estimate") + ylab("") 
-Fig_season_facet # pulls up the fig
-
 ###################################################################################
 ###################################################################################
 ###################################################################################
+# 2 MONTH  ----
 
 # Already ran this in but just in case 
 nobo_c = read.csv("./ResSelData_Course.csv") # read in the course level data 
 nobo_c[,11:22] <- scale(nobo_c[,11:22]) # scale all the variables
-##### Course -> 2 month intervals ####
 
 # January - February 
 jf_22 = nobo_c[nobo_c$Date >= "2022-01-01" & nobo_c$Date <= "2022-02-28", ]
@@ -277,7 +264,7 @@ nd_23 = nobo_c[nobo_c$Date >= "2023-11-01" & nobo_c$Date <= "2023-12-31", ]
 nd = rbind(nd_22, nd_23)
 nrow(nd) # 21612
 
-##### Models: 2 month intervals  #### 
+## Models  #### 
 
 jf_mod = glmer(response ~ DTN_road + perc_grassy + perc_bf + ndvi +(1|Bird.ID), family = binomial, data = jf)
 ma_mod = glmer(response ~ DTN_road + perc_grassy + perc_bf + ndvi +(1|Bird.ID), family = binomial, data = ma)
@@ -295,6 +282,8 @@ summary(ja_mod)
 summary(so_mod)
 summary(nd_mod)
 
+
+## Figure ----
 month_2interv_mods = list(jf_mod, ma_mod, mj_mod, ja_mod, so_mod, nd_mod)
 
 Fig3_month_2interv = dwplot(month_2interv_mods,
@@ -333,7 +322,7 @@ month2_interval_facet = dwplot(list(jf_mod, ma_mod, mj_mod, ja_mod, so_mod, nd_m
 
 
 
-##### Course -> 1 month intervals ####
+# MONTH  ####
 nobo_c = read.csv("./ResSelData_Course.csv") # read in the course level data 
 nobo_c[,11:22] <- scale(nobo_c[,11:22]) # scale all the variables
 
@@ -411,7 +400,7 @@ dec_23 = nobo_c[nobo_c$Date >= "2023-12-01" & nobo_c$Date <= "2023-12-31", ]
 dec = rbind(dec_22, dec_23)
 nrow(dec) # 678
 
-#### Models --> Months ----
+#### Models  ----
 jan_mod = glmer(response ~ DTN_road + perc_grassy + perc_bf + ndvi +(1|Bird.ID), family = binomial, data = jan)
 feb_mod = glmer(response ~ DTN_road + perc_grassy + perc_bf + ndvi +(1|Bird.ID), family = binomial, data = feb)
 mar_mod = glmer(response ~ DTN_road + perc_grassy + perc_bf + ndvi +(1|Bird.ID), family = binomial, data = mar)
@@ -438,11 +427,7 @@ summary(oct_mod)
 summary(nov_mod)
 summary(dec_mod)
 
-
-
-
-
-
+#### Figure ----
 # make a list to hold the mods 
 month_mod = list(jan_mod, feb_mod, mar_mod, apr_mod, may_mod, jun_mod, jul_mod, aug_mod, sept_mod, oct_mod, nov_mod, dec_mod)
 
