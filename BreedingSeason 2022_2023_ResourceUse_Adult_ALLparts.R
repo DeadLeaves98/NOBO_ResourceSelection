@@ -219,14 +219,29 @@ names(nobo)
 ############################ Adding Burn Status ########################################
 
 # read in OP shapefile
-Burn <- readOGR("E:/NOBO Project Data/Analyses/Breeding Season/Summer 2022/Adult data/Resource Use/shapefiles/Master_Burn_Plan.shp")
+list.files("E:/NOBO Project Data/Analyses/Breeding Season/Summer 2022/Adult data/Resource Use/shapefiles/")
+burn22 <- readOGR("E:/NOBO Project Data/Analyses/Breeding Season/Summer 2022/Adult data/Resource Use/shapefiles/BurnMap2022.shp")
+burn23 <- readOGR("E:/NOBO Project Data/Analyses/Breeding Season/Summer 2022/Adult data/Resource Use/shapefiles/BurnMap2023.shp")
 
+crs(burn22) #WGS 84 / Pseudo-Mercator
+crs(burn23) #WGS 84 / Pseudo-Mercator
 # make nobo match burn map
-nobo_sp1 <- spTransform(nobo_sp, crs(Burn)) # transform nobo_sp from WGS84 to match "burn"
+
+# Subset the data by year 
+nobo22 = subset(nobo, year == 2022)
+nobo23 = subset(nobo, year == 2023)
+
+nobo_sp1 <- spTransform(nobo_sp, crs(burn22)) # transform nobo_sp from WGS84 to match "burn22"
+
+
+
+
+
+
+
 
 # Check Coordinate systems by plotting 
 plot(Burn); plot(nobo_sp1, add = TRUE)
-
 extraction <- over(nobo_sp1, Burn)# extract burn status for points
 
 # turn all nas within burnstatus.extract column into no 
