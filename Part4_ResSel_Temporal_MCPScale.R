@@ -6,7 +6,6 @@
 
 # Goal: Compare varying temporal scales (X5) at the MCP level scale 
 
-
 # MCP  ----
 nobo_mcp = read.csv("./ResSelData_MCP.csv") # read in the course level data 
 nrow(nobo_mcp)
@@ -57,9 +56,10 @@ Fig6_ResSel_Annual = dwplot(year_mods,
   ) +
   
   theme_bw() + xlab("Coefficient Estimate") + ylab("") + 
-  scale_color_discrete(name = "Model", labels = c("Year 2022", "Year 2023"))
-Fig6_ResSel_Annual
+  scale_color_discrete(name = "Annual HomeRange Model", labels = c("Year 2022", "Year 2023"), type = c('gold', 'red'))# labels the legend then the models, then assigns colors 
 
+
+Fig6_ResSel_Annual + xlim(c(-1,1)) + coord_flip()
 
 # B VS NB ####
 
@@ -111,8 +111,10 @@ Fig1_biannual = dwplot(bi_annual_mods,
   ) +
   
   theme_bw() + xlab("Coefficient Estimate") + ylab("") + 
-  scale_color_discrete(name = "Model", labels = c("Breeding", "Non-breeding"))
-Fig1_biannual
+  scale_color_discrete(name = "Bi-Annual Homerange Model", labels = c("Breeding", "Non-breeding"), type = c('gold', 'red'))# labels the legend then the models, then assigns colors 
+
+
+Fig1_biannual + xlim(c(-1,1)) + coord_flip()
 
 ###################################################################################
 ###################################################################################
@@ -189,8 +191,11 @@ Fig2_seasonal = dwplot(list(spring_mod, summer_mod, fall_mod, winter_mod),
   ) +
   
   theme_bw() + xlab("Coefficient Estimate") + ylab("") + 
-  scale_color_discrete(name = "Model", labels = c("Spring", "Summer", "Fall", "Winter"))
-Fig2_seasonal
+  scale_color_discrete(name = "Seasonal MCP Model", labels = c("Spring", "Summer", "Fall", "Winter"), type = c('gold', 'darkorange', 'orangered2', 'red'))# labels the legend then the models, then assigns colors 
+
+
+Fig2_seasonal + xlim(c(-1,1)) + coord_flip()
+
 
 ###################################################################################
 ###################################################################################
@@ -275,23 +280,12 @@ Fig3_month_2interv = dwplot(month_2interv_mods,
   ) +
   
   theme_bw() + xlab("Coefficient Estimate") + ylab("") + 
-  scale_color_discrete(name = "Model", labels = c("Jan-Feb", "Mar-Apr", "May-Jun", "Jul-Aug", 
-                                                  "Sep-Oct", "Nov-Dec"))
-Fig3_month_2interv 
+  scale_color_discrete(name = "2-Month interval Homerange Model", labels = c("Jan-Feb", "Mar-Apr", "May-Jun", "Jul-Aug", 
+                                                  "Sep-Oct", "Nov-Dec"), type = c('gold', 'goldenrod3', 'darkorange', 'orangered','red', 'orangered4'))# labels the legend then the models, then assigns colors 
 
 
-month2_interval_facet = dwplot(list(jf_mod, ma_mod, mj_mod, ja_mod, so_mod, nd_mod), 
-                               ci = 0.95, 
-                               dodge_size = 0.4, # how far apart pts are frome eachother (0.4 = default) 
-                               show_intercept = FALSE, 
-                               model_order = NULL, 
-                               dot_args = list(size = 3), 
-                               vline = geom_vline(xintercept = 0, linetype = 2, colour ="grey8"), 
-                               vars_order = c("scale(DTN_road)", "scale(perc_grassy)", "scale(perc_bf)", "scale(ndvi)"),
-) +
-  facet_grid(~model, scales="free_y") +
-  theme_bw() + xlab("Coefficient Estimate") + ylab("")
-
+Fig3_month_2interv + xlim(c(-1,1)) + coord_flip()
+ 
 
 # Month ----
 nobo_mcp = read.csv("./ResSelData_MCP.csv") # read in the course level data 
@@ -419,8 +413,14 @@ Fig4_month = dwplot(month_mod,
   ) +
   
   theme_bw() + xlab("Coefficient Estimate") + ylab("") + 
-  scale_color_discrete(name = "Model", labels = c("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", 
-                                                  "Sep", "Oct", "Nov", "Dec"))
+  scale_color_discrete(name = "Month MCP Model", labels = c("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", 
+                                                  "Sep", "Oct", "Nov", "Dec"), 
+                       type = c('lightgoldenrod',  'gold2', 'lightgoldenrod4', 'goldenrod3', 'orange1', 
+                                                'darkorange', 'orange4', 'orangered','red2', 'orangered4', 
+                                                'tomato4', 'brown'))# labels the legend then the models, then assigns colors 
 
-Fig4_month
+
+Fig4_month + xlim(c(-1,1)) + coord_flip()
+
+
 

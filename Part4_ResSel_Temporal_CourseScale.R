@@ -130,23 +130,10 @@ Fig1_biannual = dwplot(bi_annual_mods,
   ) +
   
   theme_bw() + xlab("Coefficient Estimate") + ylab("") + 
-  scale_color_discrete(name = "Model", labels = c("Breeding", "Non-breeding"), type = c('slateblue2', 'slateblue4'))# labels the legend then the models, then assigns colors 
-Fig6_ResSel_Annual + xlim(c(-1,1)) + coord_flip()
+  scale_color_discrete(name = "Bi-Annual Course Model", labels = c("Breeding", "Non-breeding"), type = c('slateblue2', 'slateblue4'))# labels the legend then the models, then assigns colors 
+Fig1_biannual + xlim(c(-1,1)) + coord_flip()
 
 
-# Facet dot whisker plot 
-Fig1_biannual_facet = dwplot(bi_annual_mods, 
-               ci = 0.95, 
-               dodge_size = 0.4, # how far apart pts are frome eachother (0.4 = default) 
-               show_intercept = FALSE, 
-               model_order = NULL, 
-               dot_args = list(size = 3), 
-               vline = geom_vline(xintercept = 0, linetype = 2, colour ="grey8"), 
-               vars_order = c("DTN_road", "perc_grassy", "perc_bf", "ndvi"),
-) +
-  facet_grid(~model, scales="free_y") +
-  theme_bw() + xlab("Coefficient Estimate") + ylab("") 
-Fig1_biannual_facet
 
 ###################################################################################
 ###################################################################################
@@ -221,7 +208,7 @@ Fig2_seasonal = dwplot(list(spring_mod, summer_mod, fall_mod, winter_mod),
   ) +
   
   theme_bw() + xlab("Coefficient Estimate") + ylab("") + 
-  scale_color_discrete(name = "Model", labels = c("Spring", "Summer", "Fall", "Winter"), type = c('thistle2', 'plum3', 'slateblue2', 'slateblue4'))# labels the legend then the models, then assigns colors 
+  scale_color_discrete(name = "Seasonal Course Model", labels = c("Spring", "Summer", "Fall", "Winter"), type = c('thistle2', 'plum3', 'slateblue2', 'slateblue4'))# labels the legend then the models, then assigns colors 
 
 
 Fig2_seasonal + xlim(c(-1,1)) + coord_flip()
@@ -308,7 +295,7 @@ Fig3_month_2interv = dwplot(month_2interv_mods,
   ) +
   
   theme_bw() + xlab("Coefficient Estimate") + ylab("") + 
-  scale_color_discrete(name = "Model", labels = c("Jan-Feb", "Mar-Apr", "May-Jun", "Jul-Aug", 
+  scale_color_discrete(name = "2-Month Course Model", labels = c("Jan-Feb", "Mar-Apr", "May-Jun", "Jul-Aug", 
                                                   "Sep-Oct", "Nov-Dec"), type = c('thistle2', 'plum3', 'plum4', 'slateblue', 'slateblue2', 'slateblue4'))# labels the legend then the models, then assigns colors 
 
 
@@ -442,7 +429,7 @@ Fig4_month = dwplot(month_mod,
   ) +
   
   theme_bw() + xlab("Coefficient Estimate") + ylab("") + 
-  scale_color_discrete(name = "Model", labels = c("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", 
+  scale_color_discrete(name = "Monthly Course Model", labels = c("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", 
                                                   "Sep", "Oct", "Nov", "Dec"), 
                        type = c('thistle','thistle2', 'pink', 'pink3', 'plum','plum3',
                                          'mediumorchid', 'mediumorchid4',

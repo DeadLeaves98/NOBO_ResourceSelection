@@ -10,27 +10,25 @@
 nobo_MCP = read.csv("./ResSelData_MCP.csv")
 cor(nobo_MCP[,10:22]) # check for correlation 
 
-
-nobo_MCP[,11:22] <- scale(nobo_c[,11:22]) # scale all the variables
-
-
+nobo_MCP[,11:22] <- scale(nobo_MCP[,11:22]) # scale all the variables
 
 MCP_mod = glmer(response ~ DTN_road + perc_grassy + perc_bf + ndvi +(1|Bird.ID), family = binomial, data = nobo_MCP)
-summary(MCP_mod)
+summary(MCP_mod) # to look at confidence intervals and est
+
 # Scale makes covariates relative to one another 
-hist(nobo1$DTN_road)
-hist(scale(nobo1$DTN_road))
+hist(nobo_MCP$DTN_road)
+hist(scale(nobo_MCP$DTN_road))
 
 #### Course: Resource Selection Model ---- 
 nobo_Course = read.csv("./ResSelData_Course.csv")
-nobo_Course[,11:22] <- scale(nobo_c[,11:22]) # scale all the variables
+nobo_Course[,11:22] <- scale(nobo_Course[,11:22]) # scale all the variables
 
 Course_mod = glmer(response ~ DTN_road + perc_grassy + perc_bf + ndvi +(1|Bird.ID), family = binomial, data = nobo_Course)
 summary(Course_mod)
 
 #### Property AKA orton: Resource Selection Model ---- 
 nobo_Property = read.csv("./ResSelData_Property.csv")
-nobo_Property[,11:22] <- scale(nobo_c[,11:22]) # scale all the variables
+nobo_Property[,11:22] <- scale(nobo_Property[,11:22]) # scale all the variables
 
 Property_mod = glmer(response ~ DTN_road + perc_grassy + perc_bf + ndvi +(1|Bird.ID), family = binomial, data = nobo_Property)
 summary(Property_mod)
@@ -93,4 +91,7 @@ plot1 = dwplot(FullYear_mods,
         scale(ndvi) = "NDVI"
       )
     )
+
+# Continue to part 4 where we compare all scales at varying temporal scales.... 
+
 ######################################################

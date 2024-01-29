@@ -7,7 +7,7 @@
 # Goal: Compare varying temporal scales (X5) at the Property level scale 
 
 
-# COURSE ----
+# Both years together ----
 nobo_p = read.csv("./ResSelData_Property.csv") # read in the course level data 
 nrow(nobo_p)
 nobo_p[,11:22] <- scale(nobo_p[,11:22]) # scale all the variables
@@ -16,12 +16,16 @@ nobo_p[,11:22] <- scale(nobo_p[,11:22]) # scale all the variables
 Property_mod = glmer(response ~ DTN_road + perc_grassy + perc_bf + ndvi +(1|Bird.ID), family = binomial, data = nobo_p)
 summary(Property_mod)
 
-# ANNUAL ----
+# Annual  ----
 nobo_p = read.csv("./ResSelData_Property.csv") # read in the course level data 
 nrow(nobo_p)
 nobo_p[,11:22] <- scale(nobo_p[,11:22]) # scale all the variables
 
-#     breeding data subset
+## models ----
+Property_mod = glmer(response ~ DTN_road + perc_grassy + perc_bf + ndvi +(1|Bird.ID), family = binomial, data = nobo_p)
+summary(Property_mod)
+
+# data subset by year 
 annual22 <- nobo_p[nobo_p$Date >= "2022-01-01" & nobo_p$Date <= "2022-12-31", ]
 annual23 <- nobo_p[nobo_p$Date >= "2023-01-01" & nobo_p$Date <= "2023-12-31", ]
 nrow(annual22) # 35664
@@ -57,8 +61,11 @@ Fig6_ResSel_Annual = dwplot(year_mods,
   ) +
   
   theme_bw() + xlab("Coefficient Estimate") + ylab("") + 
-  scale_color_discrete(name = "Model", labels = c("Year 2022", "Year 2023"))
-Fig6_ResSel_Annual
+  scale_color_discrete(name = "Annual Property Model", labels = c("Year 2022", "Year 2023"),type = c('green', 'blue'))# labels the legend then the models, then assigns colors 
+
+
+Fig6_ResSel_Annual + xlim(c(-1,1)) + coord_flip()  #adjusts the x axis )
+
 
 
 # B VS NB ####
@@ -111,8 +118,11 @@ Fig1_biannual = dwplot(bi_annual_mods,
   ) +
   
   theme_bw() + xlab("Coefficient Estimate") + ylab("") + 
-  scale_color_discrete(name = "Model", labels = c("Breeding", "Non-breeding"))
-Fig1_biannual
+  scale_color_discrete(name = "BiAnnual Property Model", labels = c("Breeding", "Non-breeding"),type = c('green', 'blue'))# labels the legend then the models, then assigns colors 
+
+
+Fig1_biannual + xlim(c(-1,1)) + coord_flip()
+
 
 ###################################################################################
 ###################################################################################
@@ -189,8 +199,11 @@ Fig2_seasonal = dwplot(list(spring_mod, summer_mod, fall_mod, winter_mod),
   ) +
   
   theme_bw() + xlab("Coefficient Estimate") + ylab("") + 
-  scale_color_discrete(name = "Model", labels = c("Spring", "Summer", "Fall", "Winter"))
-Fig2_seasonal
+  scale_color_discrete(name = "Seasonal Property Model", labels = c("Spring", "Summer", "Fall", "Winter"), type = c('green', 'green4', 'blue', 'blue4'))# labels the legend then the models, then assigns colors 
+
+
+Fig2_seasonal + xlim(c(-1,1)) + coord_flip()
+
 
 ###################################################################################
 ###################################################################################
@@ -275,22 +288,12 @@ Fig3_month_2interv = dwplot(month_2interv_mods,
   ) +
   
   theme_bw() + xlab("Coefficient Estimate") + ylab("") + 
-  scale_color_discrete(name = "Model", labels = c("Jan-Feb", "Mar-Apr", "May-Jun", "Jul-Aug", 
-                                                  "Sep-Oct", "Nov-Dec"))
-Fig3_month_2interv 
+  scale_color_discrete(name = "2 Month Interval Property Model", labels = c("Jan-Feb", "Mar-Apr", "May-Jun", "Jul-Aug", 
+                                                  "Sep-Oct", "Nov-Dec"), type = c('greenyellow', 'green', 'green4', 'darkcyan','blue', 'blue4'))# labels the legend then the models, then assigns colors 
 
 
-month2_interval_facet = dwplot(list(jf_mod, ma_mod, mj_mod, ja_mod, so_mod, nd_mod), 
-                               ci = 0.95, 
-                               dodge_size = 0.4, # how far apart pts are frome eachother (0.4 = default) 
-                               show_intercept = FALSE, 
-                               model_order = NULL, 
-                               dot_args = list(size = 3), 
-                               vline = geom_vline(xintercept = 0, linetype = 2, colour ="grey8"), 
-                               vars_order = c("scale(DTN_road)", "scale(perc_grassy)", "scale(perc_bf)", "scale(ndvi)"),
-) +
-  facet_grid(~model, scales="free_y") +
-  theme_bw() + xlab("Coefficient Estimate") + ylab("")
+Fig3_month_2interv + xlim(c(-1,1)) + coord_flip()
+ 
 
 
 # Month ----
@@ -419,8 +422,15 @@ Fig4_month = dwplot(month_mod,
   ) +
   
   theme_bw() + xlab("Coefficient Estimate") + ylab("") + 
-  scale_color_discrete(name = "Model", labels = c("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", 
-                                                  "Sep", "Oct", "Nov", "Dec"))
+  scale_color_discrete(name = "Monthly Property Model", labels = c("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", 
+                                                  "Sep", "Oct", "Nov", "Dec"), 
+                       type = c('palegreen','greenyellow', 'green', 'darkolivegreen',
+                                           'green4', 'darkcyan', 'lightskyblue', 'royalblue', 
+                                           'royalblue3', 'blue', 'royalblue4', 'blue4'))# labels the legend then the models, then assigns colors 
 
-Fig4_month
+
+Fig4_month + xlim(c(-1,1)) + coord_flip()
+
+
+
 
