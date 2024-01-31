@@ -33,6 +33,9 @@ length(unique(nobo_c$Bird.ID)) #588
 Course_mod = glmer(response ~ DTN_road + perc_grassy + perc_bf + ndvi +(1|Bird.ID), family = binomial, data = nobo_c)
 summary(Course_mod)
 
+saveRDS(Course_mod, file = "All_Course_mod.rds")
+
+
 # ANNUAL ----
 nobo_c = read.csv("./ResSelData_Course.csv") # read in the course level data 
 nobo_c[,11:22] <- scale(nobo_c[,11:22]) # scale all the variables
@@ -44,6 +47,9 @@ annual23 <- nobo_c[nobo_c$Date >= "2023-01-01" & nobo_c$Date <= "2023-12-31", ]
 nrow(annual22) # 35664
 nrow(annual23) # 36897
 
+write.csv(annual22, "./year2022_ResSelData_Course.csv")
+write.csv(annual23, "./year2023_ResSelData_Course.csv")
+
 ## Models ----
 library(dotwhisker); library(dplyr); library(lme4)
 
@@ -53,6 +59,8 @@ summary(annual22_mod)
 summary(annual23_mod)
 # (st error * 1.96) + or - to estimate 
 
+saveRDS(annual22_mod, file = "year22_Course_mod.rds")
+saveRDS(annual23_mod, file = "year23_Course_mod.rds")
 
 ## Figure ----
 year_mods = list(annual22_mod, annual23_mod)
@@ -95,6 +103,12 @@ non_breeding3 = nobo_c[nobo_c$Date >= "2023-10-01" & nobo_c$Date <= "2023-12-31"
 nonbreeding = rbind(non_breeding1, non_breeding2, non_breeding3)
 nrow(nonbreeding) # 17826
 
+
+#
+write.csv(nonbreeding, "./nonbreeding_ResSelData_Course.csv")
+write.csv(breeding, "./breeding_ResSelData_Course.csv")
+
+
 ## Models ---- 
 library(dotwhisker); library(dplyr); library(lme4)
 
@@ -103,6 +117,8 @@ breeding_mod = glmer(response ~ DTN_road + perc_grassy + perc_bf + ndvi +(1|Bird
 summary(breeding_mod)
 summary(nonbreeding_mod)
 
+saveRDS(nonbreeding_mod , file = "NONBr_Course_mod.rds")
+saveRDS(breeding_mod, file = "Br_Course_mod.rds")
 
 ## Figure ----
 
@@ -170,6 +186,10 @@ winter22 = nobo_c[nobo_c$Date >= "2022-12-01" & nobo_c$Date <= "2023-02-28", ]
 winter23 = nobo_c[nobo_c$Date >= "2023-12-01" & nobo_c$Date <= "2024-02-28", ]
 winter = rbind(winter22, winter23)
 
+write.csv(spring, "./spring_ResSelData_Course.csv")
+write.csv(summer, "./summer_ResSelData_Course.csv")
+write.csv(fall, "./fall_ResSelData_Course.csv")
+write.csv(winter, "./winter_ResSelData_Course.csv")
 
 ## Models  #### 
 
@@ -182,6 +202,12 @@ summary(spring_mod)
 summary(summer_mod)
 summary(fall_mod)
 summary(winter_mod)
+
+saveRDS(spring_mod, file = "spring_Course_mod.rds")
+saveRDS(summer_mod, file = "summer_Course_mod.rds")
+saveRDS(fall_mod, file = "fall_Course_mod.rds")
+saveRDS(winter_mod, file = "winter_Course_mod.rds")
+
 
 ## Figure ----
 season_mod = list(spring_mod, summer_mod, fall_mod, winter_mod)
@@ -259,6 +285,17 @@ nd_23 = nobo_c[nobo_c$Date >= "2023-11-01" & nobo_c$Date <= "2023-12-31", ]
 nd = rbind(nd_22, nd_23)
 nrow(nd) # 21612
 
+
+
+write.csv(jf, "./jf_ResSelData_Course.csv")
+write.csv(ma, "./ma_ResSelData_Course.csv")
+write.csv(mj, "./mj_ResSelData_Course.csv")
+write.csv(ja, "./ja_ResSelData_Course.csv")
+write.csv(so, "./so_ResSelData_Course.csv")
+write.csv(nd, "./nd_ResSelData_Course.csv")
+
+
+
 ## Models  #### 
 
 jf_mod = glmer(response ~ DTN_road + perc_grassy + perc_bf + ndvi +(1|Bird.ID), family = binomial, data = jf)
@@ -274,6 +311,15 @@ summary(mj_mod)
 summary(ja_mod)
 summary(so_mod)
 summary(nd_mod)
+
+saveRDS(jf_mod, file = "jf_Course_mod.rds")
+saveRDS(ma_mod, file = "ma_Course_mod.rds")
+saveRDS(mj_mod, file = "mj_Course_mod.rds")
+saveRDS(ja_mod, file = "ja_Course_mod.rds")
+saveRDS(so_mod, file = "so_Course_mod.rds")
+saveRDS(nd_mod, file = "nd_Course_mod.rds")
+
+
 
 ## Figure ----
 month_2interv_mods = list(jf_mod, ma_mod, mj_mod, ja_mod, so_mod, nd_mod)
@@ -302,7 +348,8 @@ Fig3_month_2interv = dwplot(month_2interv_mods,
 Fig3_month_2interv + xlim(c(-1,1)) + coord_flip()
  
 
-
+###############################################################################
+###############################################################################
 # MONTH  ####
 nobo_c = read.csv("./ResSelData_Course.csv") # read in the course level data 
 nobo_c[,11:22] <- scale(nobo_c[,11:22]) # scale all the variables
@@ -381,6 +428,25 @@ dec_23 = nobo_c[nobo_c$Date >= "2023-12-01" & nobo_c$Date <= "2023-12-31", ]
 dec = rbind(dec_22, dec_23)
 nrow(dec) # 678
 
+
+
+write.csv(jan, "./jan_ResSelData_Course.csv")
+write.csv(feb, "./feb_ResSelData_Course.csv")
+write.csv(mar, "./mar_ResSelData_Course.csv")
+write.csv(apr, "./apr_ResSelData_Course.csv")
+write.csv(may, "./may_ResSelData_Course.csv")
+write.csv(jun, "./jun_ResSelData_Course.csv")
+write.csv(jul, "./jul_ResSelData_Course.csv")
+write.csv(aug, "./aug_ResSelData_Course.csv")
+write.csv(sept, "./sept_ResSelData_Course.csv")
+write.csv(oct, "./oct_ResSelData_Course.csv")
+write.csv(nov, "./nov_ResSelData_Course.csv")
+write.csv(dec, "./dec_ResSelData_Course.csv")
+
+
+
+
+
 #### Models  ----
 jan_mod = glmer(response ~ DTN_road + perc_grassy + perc_bf + ndvi +(1|Bird.ID), family = binomial, data = jan)
 feb_mod = glmer(response ~ DTN_road + perc_grassy + perc_bf + ndvi +(1|Bird.ID), family = binomial, data = feb)
@@ -407,6 +473,21 @@ summary(sept_mod)
 summary(oct_mod)
 summary(nov_mod)
 summary(dec_mod)
+
+saveRDS(jan_mod, file = "jan_Course_mod.rds")
+saveRDS(feb_mod, file = "feb_Course_mod.rds")
+saveRDS(mar_mod, file = "mar_Course_mod.rds")
+saveRDS(apr_mod, file = "apr_Course_mod.rds")
+saveRDS(may_mod, file = "may_Course_mod.rds")
+saveRDS(jun_mod, file = "jun_Course_mod.rds")
+saveRDS(jul_mod, file = "jul_Course_mod.rds")
+saveRDS(aug_mod, file = "aug_Course_mod.rds")
+saveRDS(sept_mod, file = "sept_Course_mod.rds")
+saveRDS(oct_mod, file = "oct_Course_mod.rds")
+saveRDS(nov_mod, file = "nov_Course_mod.rds")
+saveRDS(dec_mod, file = "dec_Course_mod.rds")
+
+
 
 #### Figure ----
 # make a list to hold the mods 
