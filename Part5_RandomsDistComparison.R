@@ -16,17 +16,28 @@ crs(OP)<- CRS("+init=epsg:4326") # define CRS for the spatial points (EPSG 4326 
 op_sf <- st_as_sf(OP) # convert to sf
 
 # generate 10,000 random points within op_sf 
-points1 = st_sample(op_sf, size = 10000)
-plot(points1, add = TRUE) # plot to check 
+r1 <- raster(crs = crs(OP), ext = extent(OP), res = 0.0005) # create a raster that has the same crs as op, to the same extent as op, and small resoutino
+values(r1) <- runif(ncell(r1)) 
+plot(r1); plot(OP, add = T)
+r2 <- data.frame(rasterToPoints(r1))
+head(r2)
+nrow(r2)
 
-points1 <- as_Spatial(points1) # convert back to sp
-points2 <- spTransform(points1, CRS("+init=epsg:4326")) # convert to lat/long because this is what nobo1 uses
-op_randcoords <- data.frame(points2@coords) # extract lat/long from the points and convert to data.frame
+# EXTRACTING RASTER VALUES
+rands_sp <- SpatialPoints(coords = data.frame("x" = r2$x, "y" = r2$y)) # convert DF to Spatial Points
+crs(rands_sp) <- CRS("+init=epsg:4326") # define CRS for the spatial points (EPSG 4326 == lat/lon WGS84 etc)
+rands_sp = spTransform(rands_sp, crs(OP)) # rands sp crs = crs OP 
+plot(OP);plot(rands_sp, add = TRUE) # make sure it works
 
-# create a dataframe to hold the randoms 
-rands <- data.frame("Location.Type" = "Random", "x" = op_randcoords$coords.x1, 
-                    "y" = op_randcoords$coords.x2)
+fall.within.poly <- rands_sp[OP,] # select for just the points that fall in our study area 
+plot(fall.within.poly)
 
+class(fall.within.poly) #spatial 
+rands = as.data.frame(fall.within.poly) # makes it into a dataframe
+nrow(rands) # check to see if it worked 
+rands$Location.Type = "Random" # just to make sure its in their for my own sake 
+
+head(rands)
 # EXTRACTING RASTER VALUES
 rands_sp <- SpatialPoints(coords = data.frame("x" = rands$x, "y" = rands$y)) # convert DF to Spatial Points
 crs(rands_sp) <- CRS("+init=epsg:4326") # define CRS for the spatial points (EPSG 4326 == lat/lon WGS84 etc)
@@ -90,60 +101,172 @@ avgcover <- data.frame("ndvi" = mean(rands$ndvi), "perc_mpine" = mean(rands$perc
                        "DTN_grassy" = mean(rands$DTN_grassy), "DTN_decid" = mean(rands$DTN_decid), 
                        "DTN_bf" = mean(rands$DTN_bf), "DTN_water" = mean(rands$DTN_water))
 
-perc_cov = avgcover %>% 
-  pivot_longer(c('ndvi', 'perc_mpine', 'perc_grassy', 'perc_decid', 'perc_bf', 'perc_water'), names_to = "covertype", values_to = "Average")
-randoms_perc_fig1 = ggplot(perc_cov, aes(x=covertype, y=Average)) + 
-  geom_bar(stat = "identity")
 
-DTN = avgcover %>% 
-  pivot_longer(c('DTN_road', 'DTN_mpine', 'DTN_grassy', 'DTN_decid', 'DTN_bf', 
-                 'DTN_water'), names_to = "covertype", values_to = "Average")
-randoms_dtn_fig2 = ggplot(DTN, aes(x=covertype, y=Average)) + 
-  geom_bar(stat = "identity")
+# I want to split this up into 2 datasets for observational convenience 
+# DTN and percent both have vastly different averages 
+# maybe this is wrong, IDK, but this will allow comparison to be a bit easier 
 
-
-################################################################################
-################################################################################
-
-prop = read.csv("./ResSelData_Property.csv") # draws in the file used in the property scaled data frame 
-head(prop)
-unique(prop$response)
-nrow(prop)
-
-prop_rands = subset(prop, response == 0)
-nrow(prop_rands)# 48374 GUCCI 
-
-#create an empty dataframe for this bad boi 
-prop_avgcover <- data.frame("ndvi" = mean(prop_rands$ndvi), "perc_mpine" = mean(prop_rands$perc_mpine), 
-                       "perc_grassy" = mean(prop_rands$perc_grassy), "perc_decid" = mean(prop_rands$perc_decid), 
-                       "perc_bf" = mean(prop_rands$perc_bf), "perc_water" = mean(prop_rands$perc_water),
-                       "DTN_road" = mean(prop_rands$DTN_road), "DTN_mpine" = mean(prop_rands$DTN_mpine),
-                       "DTN_grassy" = mean(prop_rands$DTN_grassy), "DTN_decid" = mean(prop_rands$DTN_decid), 
-                       "DTN_bf" = mean(prop_rands$DTN_bf), "DTN_water" = mean(prop_rands$DTN_water))
-
-#this is creating a dataframe with columns "Covertype" and "Average 
-prop_avg  = prop_avgcover %>% 
+# ALL VARIABLES 
+rands_avg  = avgcover %>% 
   pivot_longer(c('ndvi', 'perc_mpine', 'perc_grassy', 'perc_decid', 'perc_bf', 
                  'perc_water', 'DTN_road', 'DTN_mpine', 'DTN_grassy', 'DTN_decid', 'DTN_bf', 
                  'DTN_water'), names_to = "covertype", values_to = "Average")
 
-
-# create a plot for % cover (and splits the dataframe up to make it a little easier to see)
-prop_perc_cov = prop_avgcover %>% 
-  pivot_longer(c('ndvi', 'perc_mpine', 'perc_grassy', 'perc_decid', 'perc_bf', 'perc_water'), names_to = "covertype", values_to = "Average")
-randoms_PROP_perc_fig1 = ggplot(prop_perc_cov, aes(x=covertype, y=Average)) + 
-  geom_bar(stat = "identity")
-
-
-# create a plot for dtn (and splits the dataframe up to make it a little easier to see)
-prop_DTN = prop_avgcover %>% 
-  pivot_longer(c('DTN_road', 'DTN_mpine', 'DTN_grassy', 'DTN_decid', 'DTN_bf', 
-                 'DTN_water'), names_to = "covertype", values_to = "Average")
-randoms_PROP_dtn_fig2 = ggplot(prop_DTN, aes(x=covertype, y=Average)) + 
-  geom_bar(stat = "identity")
+# perc and ndvi 
+#perc_cov = avgcover %>% 
+#  pivot_longer(c('ndvi', 'perc_mpine', 'perc_grassy', 'perc_decid', 'perc_bf', 'perc_water'), names_to = "covertype", values_to = "Average")
+#randoms_perc_fig1 = ggplot(perc_cov, aes(x=covertype, y=Average)) + 
+# geom_bar(stat = "identity")
+# dtn 
+#DTN = avgcover %>% 
+#  pivot_longer(c('DTN_road', 'DTN_mpine', 'DTN_grassy', 'DTN_decid', 'DTN_bf', 
+#                'DTN_water'), names_to = "covertype", values_to = "Average")
+#randoms_dtn_fig2 = ggplot(DTN, aes(x=covertype, y=Average)) + 
+# geom_bar(stat = "identity")
+#
 
 ################################################################################
 ################################################################################
+########## PROPERTY ----
+prop = read.csv("./ResSelData_Property.csv") # draws in the file used in the property scaled data frame 
+head(prop)
+unique(prop$response)
+nrow(prop)
+prop_rands = subset(prop, response == 0) # only include randoms 
+nrow(prop_rands)# 48374 GUCCI 
+
+## BOXPLOTS PROP. ----
+head(prop_rands)
+
+summary(prop_rands)
+fig1_prop_perc = boxplot(prop_rands[,11:16])
+fig1_prop_dtn = boxplot(prop_rands[,17:22])
+
+# for reference --> what we will be comparing the randoms at each scale against 
+rands_avg # the 10,000 ish randomly generated points to compare 
+
+#### NDVI ----
+ndvi_bw_property = boxplot(prop_rands$ndvi, 
+            main = "Random point distribution: NDVI at the property level", 
+            ylab = "Average", 
+            xlab = "NDVI") 
+abline(h = 0.491, col = "purple")
+
+# I am sticking to these simple plots because they get the point across without 
+# me absolutely suffering 
+
+#### % mpine ----
+perc_mpine_bw_property = boxplot(prop_rands$perc_mpine, 
+            main = "Randoms for % mpine at Property Level", 
+            ylab = "Average", 
+            xlab = "% mpine") 
+abline(h = 0.529, col = "purple")
+
+#### % grassy ----
+perc_grassy_bw_property = boxplot(prop_rands$perc_grassy, 
+                                 main = "Randoms for % grassy at Property Level", 
+                                 ylab = "Average", 
+                                 xlab = "% grassy") 
+abline(h = 0.0784, col = "purple")
+
+#### % decid ----
+perc_decid_bw_property = boxplot(prop_rands$perc_decid, 
+                                  main = "Randoms for % decid at Property Level", 
+                                  ylab = "Average", 
+                                  xlab = "% decid") 
+abline(h = 0.269, col = "purple")
+
+#### % BF ----
+perc_bf_bw_property = boxplot(prop_rands$perc_bf, 
+                                  main = "Randoms for % bf at Property Level", 
+                                  ylab = "Average", 
+                                  xlab = "% bf") 
+abline(h = 0.0371, col = "purple")
+
+#### % water ----
+perc_water_bw_property = boxplot(prop_rands$perc_water, 
+                              main = "Randoms for % water at Property Level", 
+                              ylab = "Average", 
+                              xlab = "% water") 
+abline(h = 0.0371, col = "purple")
+
+#### dtn road  ----
+dtn_road_bw_property = boxplot(prop_rands$DTN_road, 
+                                 main = "Randoms for DTN road at Property Level", 
+                                 ylab = "Average", 
+                                 xlab = "DTN road") 
+abline(h = 30.4, col = "purple")
+
+#### dtn mpine  ----
+dtn_mpine_bw_property = boxplot(prop_rands$DTN_mpine, 
+                               main = "Randoms for DTN mpine at Property Level", 
+                               ylab = "Average", 
+                               xlab = "DTN mpine") 
+abline(h = 12.4, col = "purple")
+
+#### dtn grassy   ----
+dtn_grassy_bw_property = boxplot(prop_rands$DTN_grassy, 
+                                main = "Randoms for DTN grassy at Property Level", 
+                                ylab = "Average", 
+                                xlab = "DTN grassy") 
+abline(h = 238, col = "purple")
+
+#### dtn decid  ----
+dtn_mpine_bw_property = boxplot(prop_rands$DTN_decid, 
+                                main = "Randoms for DTN decid at Property Level", 
+                                ylab = "Average", 
+                                xlab = "DTN decid") 
+abline(h = 28.9, col = "purple")
+
+#### dtn bf  ----
+dtn_bf_bw_property = boxplot(prop_rands$DTN_bf, 
+                                main = "Randoms for DTN bf at Property Level", 
+                                ylab = "Average", 
+                                xlab = "DTN bf") 
+abline(h = 84.1, col = "purple")
+
+#### dtn water  ----
+dtn_water_bw_property = boxplot(prop_rands$DTN_water, 
+                                main = "Randoms for DTN water at Property Level", 
+                                ylab = "Average", 
+                                xlab = "DTN water") 
+abline(h = 149.0, col = "purple")
+
+
+
+# barchart ---- 
+#create an empty dataframe for this bad boi 
+#prop_avgcover <- data.frame("ndvi" = mean(prop_rands$ndvi), "perc_mpine" = mean(prop_rands$perc_mpine), 
+#                       "perc_grassy" = mean(prop_rands$perc_grassy), "perc_decid" = mean(prop_rands$perc_decid), 
+#                      "perc_bf" = mean(prop_rands$perc_bf), "perc_water" = mean(prop_rands$perc_water),
+#                       "DTN_road" = mean(prop_rands$DTN_road), "DTN_mpine" = mean(prop_rands$DTN_mpine),
+#                       "DTN_grassy" = mean(prop_rands$DTN_grassy), "DTN_decid" = mean(prop_rands$DTN_decid), 
+#                       "DTN_bf" = mean(prop_rands$DTN_bf), "DTN_water" = mean(prop_rands$DTN_water))
+
+#this is creating a dataframe with columns "Covertype" and "Average 
+#prop_avg  = prop_avgcover %>% 
+#  pivot_longer(c('ndvi', 'perc_mpine', 'perc_grassy', 'perc_decid', 'perc_bf', 
+#                 'perc_water', 'DTN_road', 'DTN_mpine', 'DTN_grassy', 'DTN_decid', 'DTN_bf', 
+#                 'DTN_water'), names_to = "covertype", values_to = "Average")
+# create a df  for % cover (and splits the dataframe up to make it a little easier to see)
+#prop_perc_cov = prop_avgcover %>% 
+#  pivot_longer(c('ndvi', 'perc_mpine', 'perc_grassy', 'perc_decid', 'perc_bf', 'perc_water'), names_to = "covertype", values_to = "Average")
+# create a df  for dtn (and splits the dataframe up to make it a little easier to see)
+#prop_DTN = prop_avgcover %>% 
+#  pivot_longer(c('DTN_road', 'DTN_mpine', 'DTN_grassy', 'DTN_decid', 'DTN_bf', 
+#                 'DTN_water'), names_to = "covertype", values_to = "Average")
+
+#figure
+#randoms_PROP_perc_fig1 = ggplot(prop_perc_cov, aes(x=covertype, y=Average)) + 
+#  geom_bar(stat = "identity")
+
+# figure 
+#randoms_PROP_dtn_fig2 = ggplot(prop_DTN, aes(x=covertype, y=Average)) + geom_boxplot() + geom_bar(stat = "identity") + stat_boxplot(geom = 'errorbar')
+
+
+################################################################################
+###############################################################################
+############ COURSE: -----
 course = read.csv("./ResSelData_Course.csv") # draws in the file used in the property scaled data frame 
 head(course)
 unique(course$response)
@@ -152,39 +275,137 @@ nrow(course)
 course_rands = subset(course, response == 0)
 nrow(course_rands)# 48374 GUCCI 
 
+### BOXPLOTS ----
+head(course_rands)
+
+summary(course_rands)
+fig1_course_perc = boxplot(course_rands[,11:16])
+fig1_course_dtn = boxplot(course_rands[,17:22])
+
+# for reference 
+rands_avg # the 10,000 ish randomly generated points to compare 
+
+#### NDVI ----
+ndvi_bw_course = boxplot(course_rands$ndvi, 
+                           main = "Random point distribution: NDVI at the course level", 
+                           ylab = "Average", 
+                           xlab = "NDVI") 
+abline(h = 0.491, col = "purple")
+
+# I am sticking to these simple plots because they get the point across without 
+# me absolutely suffering 
+
+#### % mpine ----
+perc_mpine_bw_course = boxplot(course_rands$perc_mpine, 
+                                 main = "Randoms for % mpine at course Level", 
+                                 ylab = "Average", 
+                                 xlab = "% mpine") 
+abline(h = 0.529, col = "purple")
+
+#### % grassy ----
+perc_grassy_bw_course = boxplot(course_rands$perc_grassy, 
+                                  main = "Randoms for % grassy at course Level", 
+                                  ylab = "Average", 
+                                  xlab = "% grassy") 
+abline(h = 0.0784, col = "purple")
+
+#### % decid ----
+perc_decid_bw_course = boxplot(course_rands$perc_decid, 
+                                 main = "Randoms for % decid at course Level", 
+                                 ylab = "Average", 
+                                 xlab = "% decid") 
+abline(h = 0.269, col = "purple")
+
+#### % BF ----
+perc_bf_bw_course = boxplot(course_rands$perc_bf, 
+                              main = "Randoms for % bf at course Level", 
+                              ylab = "Average", 
+                              xlab = "% bf") 
+abline(h = 0.0371, col = "purple")
+
+#### % water ----
+perc_water_bw_course = boxplot(course_rands$perc_water, 
+                                 main = "Randoms for % water at course Level", 
+                                 ylab = "Average", 
+                                 xlab = "% water") 
+abline(h = 0.0371, col = "purple")
+
+#### dtn road  ----
+dtn_road_bw_course = boxplot(course_rands$DTN_road, 
+                               main = "Randoms for DTN road at course Level", 
+                               ylab = "Average", 
+                               xlab = "DTN road") 
+abline(h = 30.4, col = "purple")
+
+#### dtn mpine  ----
+dtn_mpine_bw_course = boxplot(course_rands$DTN_mpine, 
+                                main = "Randoms for DTN mpine at course Level", 
+                                ylab = "Average", 
+                                xlab = "DTN mpine") 
+abline(h = 12.4, col = "purple")
+
+#### dtn grassy   ----
+dtn_grassy_bw_course = boxplot(course_rands$DTN_grassy, 
+                                 main = "Randoms for DTN grassy at course Level", 
+                                 ylab = "Average", 
+                                 xlab = "DTN grassy") 
+abline(h = 238, col = "purple")
+
+#### dtn decid  ----
+dtn_mpine_bw_course = boxplot(course_rands$DTN_decid, 
+                                main = "Randoms for DTN decid at course Level", 
+                                ylab = "Average", 
+                                xlab = "DTN decid") 
+abline(h = 28.9, col = "purple")
+
+#### dtn bf  ----
+dtn_bf_bw_course = boxplot(course_rands$DTN_bf, 
+                             main = "Randoms for DTN bf at course Level", 
+                             ylab = "Average", 
+                             xlab = "DTN bf") 
+abline(h = 84.1, col = "purple")
+
+#### dtn water  ----
+dtn_water_bw_course = boxplot(course_rands$DTN_water, 
+                                main = "Randoms for DTN water at course Level", 
+                                ylab = "Average", 
+                                xlab = "DTN water") 
+abline(h = 149.0, col = "purple")
+
+## bar graphs 
 #create an empty dataframe for this bad boi 
-course_avgcover <- data.frame("ndvi" = mean(course_rands$ndvi), "perc_mpine" = mean(course_rands$perc_mpine), 
-                            "perc_grassy" = mean(course_rands$perc_grassy), "perc_decid" = mean(course_rands$perc_decid), 
-                            "perc_bf" = mean(course_rands$perc_bf), "perc_water" = mean(course_rands$perc_water),
-                            "DTN_road" = mean(course_rands$DTN_road), "DTN_mpine" = mean(course_rands$DTN_mpine),
-                            "DTN_grassy" = mean(course_rands$DTN_grassy), "DTN_decid" = mean(course_rands$DTN_decid), 
-                            "DTN_bf" = mean(course_rands$DTN_bf), "DTN_water" = mean(course_rands$DTN_water))
-
+#course_avgcover <- data.frame("ndvi" = mean(course_rands$ndvi), "perc_mpine" = mean(course_rands$perc_mpine), 
+#                            "perc_grassy" = mean(course_rands$perc_grassy), "perc_decid" = mean(course_rands$perc_decid), 
+#                            "perc_bf" = mean(course_rands$perc_bf), "perc_water" = mean(course_rands$perc_water),
+#                            "DTN_road" = mean(course_rands$DTN_road), "DTN_mpine" = mean(course_rands$DTN_mpine),
+#                            "DTN_grassy" = mean(course_rands$DTN_grassy), "DTN_decid" = mean(course_rands$DTN_decid), 
+#                            "DTN_bf" = mean(course_rands$DTN_bf), "DTN_water" = mean(course_rands$DTN_water))
+#
 #this is creating a dataframe with columns "Covertype" and "Average 
-course_avg  = course_avgcover %>% 
-  pivot_longer(c('ndvi', 'perc_mpine', 'perc_grassy', 'perc_decid', 'perc_bf', 
-                 'perc_water', 'DTN_road', 'DTN_mpine', 'DTN_grassy', 'DTN_decid', 'DTN_bf', 
-                 'DTN_water'), names_to = "covertype", values_to = "Average")
-
-
+#course_avg  = course_avgcover %>% 
+#  pivot_longer(c('ndvi', 'perc_mpine', 'perc_grassy', 'perc_decid', 'perc_bf', 
+#                 'perc_water', 'DTN_road', 'DTN_mpine', 'DTN_grassy', 'DTN_decid', 'DTN_bf', 
+#                 'DTN_water'), names_to = "covertype", values_to = "Average")
+#
+#
 # create a plot for % cover (and splits the dataframe up to make it a little easier to see)
-course_perc_cov = course_avgcover %>% 
-  pivot_longer(c('ndvi', 'perc_mpine', 'perc_grassy', 'perc_decid', 'perc_bf', 'perc_water'), names_to = "covertype", values_to = "Average")
-randoms_course_perc_fig1 = ggplot(course_perc_cov, aes(x=covertype, y=Average)) + 
-  geom_bar(stat = "identity")
+#course_perc_cov = course_avgcover %>% 
+#  pivot_longer(c('ndvi', 'perc_mpine', 'perc_grassy', 'perc_decid', 'perc_bf', 'perc_water'), names_to = "covertype", values_to = "Average")
+#randoms_course_perc_fig1 = ggplot(course_perc_cov, aes(x=covertype, y=Average)) + 
+#  geom_bar(stat = "identity")
 
 
 # create a plot for dtn (and splits the dataframe up to make it a little easier to see)
-course_DTN = course_avgcover %>% 
-  pivot_longer(c('DTN_road', 'DTN_mpine', 'DTN_grassy', 'DTN_decid', 'DTN_bf', 
-                 'DTN_water'), names_to = "covertype", values_to = "Average")
-randoms_course_dtn_fig2 = ggplot(course_DTN, aes(x=covertype, y=Average)) + 
-  geom_bar(stat = "identity")
+#course_DTN = course_avgcover %>% 
+#  pivot_longer(c('DTN_road', 'DTN_mpine', 'DTN_grassy', 'DTN_decid', 'DTN_bf', 
+#                 'DTN_water'), names_to = "covertype", values_to = "Average")
+#randoms_course_dtn_fig2 = ggplot(course_DTN, aes(x=covertype, y=Average)) + 
+#  geom_bar(stat = "identity")
 
 
 ###############################################################################
 ###############################################################################
-
+# HOMERANGE 
 mcp = read.csv("./ResSelData_MCP.csv") # draws in the file used in the property scaled data frame 
 head(mcp)
 unique(mcp$response)
@@ -193,19 +414,106 @@ nrow(mcp)
 mcp_rands = subset(mcp, response == 0)
 nrow(mcp_rands)# 48374 GUCCI 
 
-#create an empty dataframe for this bad boi 
-mcp_avgcover <- data.frame("ndvi" = mean(mcp_rands$ndvi), "perc_mpine" = mean(mcp_rands$perc_mpine), 
-                              "perc_grassy" = mean(mcp_rands$perc_grassy), "perc_decid" = mean(mcp_rands$perc_decid), 
-                              "perc_bf" = mean(mcp_rands$perc_bf), "perc_water" = mean(mcp_rands$perc_water),
-                              "DTN_road" = mean(mcp_rands$DTN_road), "DTN_mpine" = mean(mcp_rands$DTN_mpine),
-                              "DTN_grassy" = mean(mcp_rands$DTN_grassy), "DTN_decid" = mean(mcp_rands$DTN_decid), 
-                              "DTN_bf" = mean(mcp_rands$DTN_bf), "DTN_water" = mean(mcp_rands$DTN_water))
+### BOXPLOTS ----
+head(mcp_rands)
 
-#this is creating a dataframe with columns "Covertype" and "Average 
-mcp_avg  = mcp_avgcover %>% 
-  pivot_longer(c('ndvi', 'perc_mpine', 'perc_grassy', 'perc_decid', 'perc_bf', 
-                 'perc_water', 'DTN_road', 'DTN_mpine', 'DTN_grassy', 'DTN_decid', 'DTN_bf', 
-                 'DTN_water'), names_to = "covertype", values_to = "Average")
+summary(mcp_rands)
+fig1_mcp_perc = boxplot(mcp_rands[,11:16])
+fig1_mcp_dtn = boxplot(mcp_rands[,17:22])
+
+# for reference 
+rands_avg # the 10,000 ish randomly generated points to compare 
+
+#### NDVI ----
+ndvi_bw_mcp = boxplot(mcp_rands$ndvi, 
+                           main = "Random point distribution: NDVI at the MCP level", 
+                           ylab = "Average", 
+                           xlab = "NDVI") 
+abline(h = 0.491, col = "purple")
+
+# I am sticking to these simple plots because they get the point across without 
+# me absolutely suffering 
+
+#### % mpine ----
+perc_mpine_bw_mcp = boxplot(mcp_rands$perc_mpine, 
+                                 main = "Randoms for % mpine at MCP Level", 
+                                 ylab = "Average", 
+                                 xlab = "% mpine") 
+abline(h = 0.529, col = "purple")
+
+#### % grassy ----
+perc_grassy_bw_mcp = boxplot(mcp_rands$perc_grassy, 
+                                  main = "Randoms for % grassy at MCP Level", 
+                                  ylab = "Average", 
+                                  xlab = "% grassy") 
+abline(h = 0.0784, col = "purple")
+
+#### % decid ----
+perc_decid_bw_mcp = boxplot(mcp_rands$perc_decid, 
+                                 main = "Randoms for % decid at mcp Level", 
+                                 ylab = "Average", 
+                                 xlab = "% decid") 
+abline(h = 0.269, col = "purple")
+
+#### % BF ----
+perc_bf_bw_mcp = boxplot(mcp_rands$perc_bf, 
+                              main = "Randoms for % bf at mcp Level", 
+                              ylab = "Average", 
+                              xlab = "% bf") 
+abline(h = 0.0371, col = "purple")
+
+#### % water ----
+perc_water_bw_mcp = boxplot(mcp_rands$perc_water, 
+                                 main = "Randoms for % water at mcp Level", 
+                                 ylab = "Average", 
+                                 xlab = "% water") 
+abline(h = 0.0371, col = "purple")
+
+#### dtn road  ----
+dtn_road_bw_mcp = boxplot(mcp_rands$DTN_road, 
+                               main = "Randoms for DTN road at mcp Level", 
+                               ylab = "Average", 
+                               xlab = "DTN road") 
+abline(h = 30.4, col = "purple")
+
+#### dtn mpine  ----
+dtn_mpine_bw_mcp = boxplot(mcp_rands$DTN_mpine, 
+                                main = "Randoms for DTN mpine at mcp Level", 
+                                ylab = "Average", 
+                                xlab = "DTN mpine") 
+abline(h = 12.4, col = "purple")
+
+#### dtn grassy   ----
+dtn_grassy_bw_mcp = boxplot(mcp_rands$DTN_grassy, 
+                                 main = "Randoms for DTN grassy at mcp Level", 
+                                 ylab = "Average", 
+                                 xlab = "DTN grassy") 
+abline(h = 238, col = "purple")
+
+#### dtn decid  ----
+dtn_mpine_bw_mcp = boxplot(mcp_rands$DTN_decid, 
+                                main = "Randoms for DTN decid at mcp Level", 
+                                ylab = "Average", 
+                                xlab = "DTN decid") 
+abline(h = 28.9, col = "purple")
+
+#### dtn bf  ----
+dtn_bf_bw_mcp = boxplot(mcp_rands$DTN_bf, 
+                             main = "Randoms for DTN bf at mcp Level", 
+                             ylab = "Average", 
+                             xlab = "DTN bf") 
+abline(h = 84.1, col = "purple")
+
+#### dtn water  ----
+dtn_water_bw_mcp = boxplot(prop_rands$DTN_water, 
+                                main = "Randoms for DTN water at mcp Level", 
+                                ylab = "Average", 
+                                xlab = "DTN water") 
+abline(h = 149.0, col = "purple")
+
+
+
+
 
 
 # create a plot for % cover (and splits the dataframe up to make it a little easier to see)
@@ -221,4 +529,24 @@ mcp_DTN = mcp_avgcover %>%
                  'DTN_water'), names_to = "covertype", values_to = "Average")
 randoms_mcp_dtn_fig2 = ggplot(mcp_DTN, aes(x=covertype, y=Average)) + 
   geom_bar(stat = "identity")
+
+
+
+
+
+
+#create an empty dataframe for this bad boi 
+mcp_avgcover <- data.frame("ndvi" = mean(mcp_rands$ndvi), "perc_mpine" = mean(mcp_rands$perc_mpine), 
+                           "perc_grassy" = mean(mcp_rands$perc_grassy), "perc_decid" = mean(mcp_rands$perc_decid), 
+                           "perc_bf" = mean(mcp_rands$perc_bf), "perc_water" = mean(mcp_rands$perc_water),
+                           "DTN_road" = mean(mcp_rands$DTN_road), "DTN_mpine" = mean(mcp_rands$DTN_mpine),
+                           "DTN_grassy" = mean(mcp_rands$DTN_grassy), "DTN_decid" = mean(mcp_rands$DTN_decid), 
+                           "DTN_bf" = mean(mcp_rands$DTN_bf), "DTN_water" = mean(mcp_rands$DTN_water))
+
+#this is creating a dataframe with columns "Covertype" and "Average 
+mcp_avg  = mcp_avgcover %>% 
+  pivot_longer(c('ndvi', 'perc_mpine', 'perc_grassy', 'perc_decid', 'perc_bf', 
+                 'perc_water', 'DTN_road', 'DTN_mpine', 'DTN_grassy', 'DTN_decid', 'DTN_bf', 
+                 'DTN_water'), names_to = "covertype", values_to = "Average")
+
 
