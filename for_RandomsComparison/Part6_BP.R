@@ -216,9 +216,9 @@ nrow(BP2) #4922 --> this should be good. 2 * the number of originals. 2461 * 2 =
 # part 3: COVERTYPE EXTRACTION 
 
 # EXTRACTING RASTER VALUES
-cc2_sp <- SpatialPoints(coords = data.frame("x" = CC2$x, "y" = CC2$y)) # convert DF to Spatial Points
-crs(cc2_sp) <- CRS("+init=epsg:4326") # define CRS for the spatial points (EPSG 4326 == lat/lon WGS84 etc)
-plot(cc2_sp)
+bp2_sp <- SpatialPoints(coords = data.frame("x" = BP2$x, "y" = BP2$y)) # convert DF to Spatial Points
+crs(bp2_sp) <- CRS("+init=epsg:4326") # define CRS for the spatial points (EPSG 4326 == lat/lon WGS84 etc)
+plot(bp2_sp)
 # read in rasters
 # hard copied into it because unsure if git can handle
 list.files("E:/NOBO Project Data/Analyses/Breeding Season/Summer 2023/Adult/rasters")
@@ -236,37 +236,37 @@ DTN_bf <- raster("E:/NOBO Project Data/Analyses/Breeding Season/Summer 2023/Adul
 DTN_water <- raster("E:/NOBO Project Data/Analyses/Breeding Season/Summer 2023/Adult/rasters/DTN_water.tif")
 
 # reproject nobo and extract
-cc2_sp1 <- spTransform(cc2_sp, crs(NDVI)) # transform to NAD83
-plot(NDVI); plot(cc2_sp1, add = TRUE)
-ndv1_ex <- raster::extract(x = NDVI, y = cc2_sp1)
-perc_mpine_ex <- raster::extract(x = perc_mpine, y = cc2_sp1)
-perc_grassy_ex <- raster::extract(x = perc_grassy, y = cc2_sp1)
-perc_decid_ex <- raster::extract(x = perc_decid, y = cc2_sp1)
-perc_bf_ex <- raster::extract(x = perc_bf, y = cc2_sp1)
-perc_water_ex <- raster::extract(x = perc_water, y = cc2_sp1)
+bp2_sp1 <- spTransform(bp2_sp, crs(NDVI)) # transform to NAD83
+plot(NDVI); plot(bp2_sp1, add = TRUE)
+ndv1_ex <- raster::extract(x = NDVI, y = bp2_sp1)
+perc_mpine_ex <- raster::extract(x = perc_mpine, y = bp2_sp1)
+perc_grassy_ex <- raster::extract(x = perc_grassy, y = bp2_sp1)
+perc_decid_ex <- raster::extract(x = perc_decid, y = bp2_sp1)
+perc_bf_ex <- raster::extract(x = perc_bf, y = bp2_sp1)
+perc_water_ex <- raster::extract(x = perc_water, y = bp2_sp1)
 
-cc2_sp2 <- spTransform(cc2_sp, crs(DTN_road)) # transform to pseudo-mercator
-plot(DTN_road); plot(cc2_sp2, add = TRUE)
-DTN_road_ex <- raster::extract(x = DTN_road, y = cc2_sp2)
-DTN_mpine_ex <- raster::extract(x = DTN_mpine, y = cc2_sp2)
-DTN_grassy_ex <- raster::extract(x = DTN_grassy, y = cc2_sp2)
-DTN_decid_ex <- raster::extract(x = DTN_decid, y = cc2_sp2)
-DTN_bf_ex <- raster::extract(x = DTN_bf, y = cc2_sp2)
-DTN_water_ex <- raster::extract(x = DTN_water, y = cc2_sp2)
+bp2_sp2 <- spTransform(bp2_sp, crs(DTN_road)) # transform to pseudo-mercator
+plot(DTN_road); plot(bp2_sp2, add = TRUE)
+DTN_road_ex <- raster::extract(x = DTN_road, y = bp2_sp2)
+DTN_mpine_ex <- raster::extract(x = DTN_mpine, y = bp2_sp2)
+DTN_grassy_ex <- raster::extract(x = DTN_grassy, y = bp2_sp2)
+DTN_decid_ex <- raster::extract(x = DTN_decid, y = bp2_sp2)
+DTN_bf_ex <- raster::extract(x = DTN_bf, y = bp2_sp2)
+DTN_water_ex <- raster::extract(x = DTN_water, y = bp2_sp2)
 
 # add columns to NOBO and export
-CC2$ndvi <- ndv1_ex
-CC2$perc_mpine <- perc_mpine_ex
-CC2$perc_grassy <- perc_grassy_ex
-CC2$perc_decid <- perc_decid_ex
-CC2$perc_bf <- perc_bf_ex
-CC2$perc_water <- perc_water_ex
-CC2$DTN_road <- DTN_road_ex
-CC2$DTN_mpine <- DTN_mpine_ex
-CC2$DTN_grassy <- DTN_grassy_ex
-CC2$DTN_decid <- DTN_decid_ex
-CC2$DTN_bf <- DTN_bf_ex
-CC2$DTN_water <- DTN_water_ex 
+BP2$ndvi <- ndv1_ex
+BP2$perc_mpine <- perc_mpine_ex
+BP2$perc_grassy <- perc_grassy_ex
+BP2$perc_decid <- perc_decid_ex
+BP2$perc_bf <- perc_bf_ex
+BP2$perc_water <- perc_water_ex
+BP2$DTN_road <- DTN_road_ex
+BP2$DTN_mpine <- DTN_mpine_ex
+BP2$DTN_grassy <- DTN_grassy_ex
+BP2$DTN_decid <- DTN_decid_ex
+BP2$DTN_bf <- DTN_bf_ex
+BP2$DTN_water <- DTN_water_ex 
 
 # View(CC2)
 ##############################################################################
@@ -277,95 +277,95 @@ CC2$DTN_water <- DTN_water_ex
 #### Part 4 ----
 
 # boxwhisker plots 
-head(CC_rands_avg) # the mean cover type for fence cove AKA what we will be comparing 
+head(BP_rands_avg) # the mean cover type for fence cove AKA what we will be comparing 
 # our randoms generated per bird to to make sure the randoms are accurately representing 
 # the course 
 
-head(CC2)
+head(BP2)
 #### NDVI ----
-ndvi_bw_campcrane = boxplot(CC2$ndvi, 
-                            main = "Random point distribution: NDVI in CC", 
+ndvi_bw_bluepond = boxplot(BP2$ndvi, 
+                            main = "Random point distribution: NDVI in BP", 
                             ylab = "Average", 
                             xlab = "NDVI") 
-abline(h = 0.495, col = "purple")
+abline(h = 0.583, col = "purple")
 
 #### % mpine ----
-perc_mpine_bw_campcrane = boxplot(CC2$perc_mpine, 
-                                  main = "Randoms for % mpine in CC", 
+perc_mpine_bw_bluepond = boxplot(BP2$perc_mpine, 
+                                  main = "Randoms for % mpine in BP", 
                                   ylab = "Average", 
                                   xlab = "% mpine") 
-abline(h = 0.562, col = "purple")
+abline(h = 0.608, col = "purple")
 
 #### % grassy ----
-perc_grassy_bw_campcrane = boxplot(CC2$perc_grassy, 
-                                   main = "Randoms for % grassy in CC", 
+perc_grassy_bw_bluepond = boxplot(BP2$perc_grassy, 
+                                   main = "Randoms for % grassy in BP", 
                                    ylab = "Average", 
                                    xlab = "% grassy") 
-abline(h = 0.0000735, col = "purple")
+abline(h = 0.0195, col = "purple")
 
 #### % decid ----
-perc_decid_bw_campcrane = boxplot(CC2$perc_decid, 
-                                  main = "Randoms for % decid in CC", 
+perc_decid_bw_bluepond = boxplot(BP2$perc_decid, 
+                                  main = "Randoms for % decid in BP", 
                                   ylab = "Average", 
                                   xlab = "% decid") 
-abline(h = 0.248, col = "purple")
+abline(h = 0.305, col = "purple")
 
 #### % BF ----
-perc_bf_bw_campcrane = boxplot(CC2$perc_bf, 
-                               main = "Randoms for % bf in CC", 
+perc_bf_bw_bluepond = boxplot(BP2$perc_bf, 
+                               main = "Randoms for % bf in BP", 
                                ylab = "Average", 
                                xlab = "% bf") 
-abline(h = 0.00546, col = "purple")
+abline(h = 0.0260, col = "purple")
 
 #### % water ----
-perc_water_bw_campcrane = boxplot(CC2$perc_water, 
-                                  main = "Randoms for % water in CC", 
+perc_water_bw_bluepond = boxplot(BP2$perc_water, 
+                                  main = "Randoms for % water in BP", 
                                   ylab = "Average", 
                                   xlab = "% water") 
-abline(h = 0.163, col = "purple") #TO NOTE: WILL BE REMOVING THIS FROM THE DATA ANYWAY 
+abline(h = 0.0459, col = "purple") #TO NOTE: WILL BE REMOVING THIS FROM THE DATA ANYWAY 
 
 
 #### dtn road  ----
-dtn_road_bw_campcrane = boxplot(CC2$DTN_road, 
-                                main = "Randoms for DTN road in CC", 
+dtn_road_bw_bluepond = boxplot(BP2$DTN_road, 
+                                main = "Randoms for DTN road in BP", 
                                 ylab = "Average", 
                                 xlab = "DTN road") 
-abline(h = 31.2, col = "purple")
+abline(h = 26.7, col = "purple")
 
 #### dtn mpine  ----
-dtn_mpine_bw_campcrane = boxplot(CC2$DTN_mpine, 
-                                 main = "Randoms for DTN mpine in CC", 
+dtn_mpine_bw_bluepond = boxplot(BP2$DTN_mpine, 
+                                 main = "Randoms for DTN mpine in BP", 
                                  ylab = "Average", 
                                  xlab = "DTN mpine") 
-abline(h = 15.8, col = "purple")
+abline(h = 7.02, col = "purple")
 
 #### dtn grassy   ----
-dtn_grassy_bw_campcrane = boxplot(CC2$DTN_grassy, 
-                                  main = "Randoms for DTN grassy in CC", 
+dtn_grassy_bw_bluepond = boxplot(BP2$DTN_grassy, 
+                                  main = "Randoms for DTN grassy in BP", 
                                   ylab = "Average", 
                                   xlab = "DTN grassy") 
-abline(h = 434, col = "purple")
+abline(h = 211.0, col = "purple")
 
 #### dtn decid  ----
-dtn_mpine_bw_campcrane = boxplot(CC2$DTN_decid, 
-                                 main = "Randoms for DTN decid in CC", 
+dtn_mpine_bw_bluepond = boxplot(BP2$DTN_decid, 
+                                 main = "Randoms for DTN decid in BP", 
                                  ylab = "Average", 
                                  xlab = "DTN decid") 
-abline(h = 21.5, col = "purple")
+abline(h = 17.3, col = "purple")
 
 #### dtn bf  ----
-dtn_bf_bw_campcrane = boxplot(CC2$DTN_bf, 
-                              main = "Randoms for DTN bf in CC", 
+dtn_bf_bw_bluepond = boxplot(BP2$DTN_bf, 
+                              main = "Randoms for DTN bf in BP", 
                               ylab = "Average", 
                               xlab = "DTN bf") 
-abline(h = 171.0, col = "purple")
+abline(h = 70.6, col = "purple")
 
 #### dtn water  ----
-dtn_water_bw_campcrane = boxplot(CC2$DTN_water, 
-                                 main = "Randoms for DTN water in CC", 
+dtn_water_bw_bluepond = boxplot(BP2$DTN_water, 
+                                 main = "Randoms for DTN water in BP", 
                                  ylab = "Average", 
                                  xlab = "DTN water") 
-abline(h = 94.3, col = "purple")
+abline(h = 121.0, col = "purple")
 
 
 # IN SUM: 
