@@ -15,6 +15,7 @@ nobo_mcp[,11:22] <- scale(nobo_mcp[,11:22]) # scale all the variables
 MCP_mod = glmer(response ~ DTN_road + perc_grassy + perc_bf + ndvi +(1|Bird.ID), family = binomial, data = nobo_mcp)
 summary(MCP_mod)
 
+
 # ANNUAL ----
 nobo_mcp = read.csv("./ResSelData_MCP.csv") # read in the course level data 
 nrow(nobo_mcp)
