@@ -1,16 +1,18 @@
-# Title: Randoms COmarison for big bay 
+# Title: Randoms Comparison for big bay 
 # Author: Autumn 
 # Date started: 2/2/2024
 ##############################
 #   1) Within this code I will be generating randoms in a grid like formation across 
-#   fence cove for a relatively even distribution. I will be taking the mean value 
-#   for each cover type. 
+#   the property. The resolution to genenrate the grid formation is currently about 0.0001 which is small 
+#   previouslym it was 0.0005. By clipping to each course, I then used these random points to 
+#   find the average for each of our predictor variables.
 #   2) Next, I will be generating randoms with a 2:1 ratio to the reals. 
-#   Then, I will be extracting values for each of the covertype via our rasters 
+#   Then, I will be extracting values for each of the predictor variables via our rasters 
 #   that dj created. 
 #   3) I will be creating box whisker plots for easy interpretation
 #   for each of the covertypes for the randoms that were generated using the reals (2:1) 
 #   and adding an abline at for the mean covertype of each course generated in part 1.
+#   4) if the whiskers do not overlap the abline I increased the ratio for randoms to reals (i.e. 5:1 ratio) 
 ##############################
 
 

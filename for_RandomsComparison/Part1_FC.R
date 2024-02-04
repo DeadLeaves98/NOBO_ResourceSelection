@@ -1,16 +1,18 @@
-# Title: Randoms COmarison for fence cove 
+# Title: Randoms COmparison for fence cove 
 # Author: Autumn 
 # Date started: 2/2/2024
 ##############################
 #   1) Within this code I will be generating randoms in a grid like formation across 
-#   fence cove for a relatively even distribution. I will be taking the mean value 
-#   for each cover type. 
+#   the property. The resolution to genenrate the grid formation is currently about 0.0001 which is small 
+#   previouslym it was 0.0005. By clipping to each course, I then used these random points to 
+#   find the average for each of our predictor variables.
 #   2) Next, I will be generating randoms with a 2:1 ratio to the reals. 
-#   Then, I will be extracting values for each of the covertype via our rasters 
+#   Then, I will be extracting values for each of the predictor variables via our rasters 
 #   that dj created. 
 #   3) I will be creating box whisker plots for easy interpretation
 #   for each of the covertypes for the randoms that were generated using the reals (2:1) 
 #   and adding an abline at for the mean covertype of each course generated in part 1.
+#   4) if the whiskers do not overlap the abline I increased the ratio for randoms to reals (i.e. 5:1 ratio) 
 ##############################
   
 
@@ -173,14 +175,14 @@ for(i in 1:length(unique(FC$Bird.ID))){
   # turn nobo_i into spatial. Used for a figure below
   fc_nobo_i_spatial <- SpatialPoints(coords = data.frame("x" = fc_nobo_i$x, "y" = fc_nobo_i$y)) # convert DF to Spatial Points
   crs(fc_nobo_i_spatial) <- CRS("+init=epsg:4326") # define CRS for the spatial points (EPSG 4326 == lat/lon WGS84 etc)
-  fc_nobo_i_spatial <- spTransform(fc_nobo_i_spatial, crs(fence_shp)) # make sure it matches OP shapefile: "North American Datum 1983" 
-  plot(fence_shp); plot(fc_nobo_i_spatial, add = TRUE, col = "blue") 
+  fc_nobo_i_spatial <- spTransform(fc_nobo_i_spatial, crs(fc_shp)) # make sure it matches OP shapefile: "North American Datum 1983" 
+  plot(fc_shp); plot(fc_nobo_i_spatial, add = TRUE, col = "blue") 
   
   # generates random points
-  fc_course_i_sh2 <- st_as_sf(fence_shp) # convert to sf
+  fc_course_i_sh2 <- st_as_sf(fc_shp) # convert to sf
   fc_points1 = st_sample(fc_course_i_sh2, size = nrow(fc_nobo_i) * 2) # generate 2 random points for each "used" point using st_sample()
   fc_points1 <- as_Spatial(fc_points1) # convert back to sp
-  plot(fence_shp); plot(fc_points1, add = TRUE, col = "red"); plot(fc_nobo_i_spatial, add = TRUE, col = "blue") # plot to confirm it worked
+  plot(fc_shp); plot(fc_points1, add = TRUE, col = "red"); plot(fc_nobo_i_spatial, add = TRUE, col = "blue") # plot to confirm it worked
   fc_points2 <- spTransform(fc_points1, CRS("+init=epsg:4326")) # convert to lat/long because this is what nobo1 uses
   randomcoords <- data.frame(fc_points2@coords) # extract lat/long from the points and convert to data.frame
   # NEW: We need to add random coordinates to a dataframe that will 
