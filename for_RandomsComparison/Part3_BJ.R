@@ -182,7 +182,7 @@ for(i in 1:length(unique(BJ$Bird.ID))){
   
   # generates random points
   bj_course_i_sh2 <- st_as_sf(bj_shp) # convert to sf
-  bj_points1 = st_sample(bj_course_i_sh2, size = nrow(bj_nobo_i) * 5) # generate 2 random points for ebjh "used" point using st_sample()
+  bj_points1 = st_sample(bj_course_i_sh2, size = nrow(bj_nobo_i) * 10) # generate 2 random points for ebjh "used" point using st_sample()
   bj_points1 <- as_Spatial(bj_points1) # convert bbjk to sp
   plot(bj_shp); plot(bj_points1, add = TRUE, col = "red"); plot(bj_nobo_i_spatial, add = TRUE, col = "blue") # plot to confirm it worked
   bj_points2 <- spTransform(bj_points1, CRS("+init=epsg:4326")) # convert to lat/long because this is what nobo1 uses
@@ -190,7 +190,8 @@ for(i in 1:length(unique(BJ$Bird.ID))){
   # NEW: We need to add random coordinates to a dataframe that will 
   
   # generate pseudo-dates for the randoms
-  random_dates <- c(bj_nobo_i$Date, bj_nobo_i$Date, bj_nobo_i$Date, bj_nobo_i$Date, bj_nobo_i$Date) # for every random generated for each pt, another copy and paste "bj_nobo_i$Date" will need to be done
+  random_dates <- c(bj_nobo_i$Date, bj_nobo_i$Date, bj_nobo_i$Date, bj_nobo_i$Date, bj_nobo_i$Date, bj_nobo_i$Date,
+                    bj_nobo_i$Date, bj_nobo_i$Date, bj_nobo_i$Date, bj_nobo_i$Date) # for every random generated for each pt, another copy and paste "bj_nobo_i$Date" will need to be done
   
   # Create an empty for randoms suitable for rbind()
   head(BJ2) # take a look at NOBO data.frame
@@ -306,7 +307,7 @@ abline(h = 0.599, col = "purple")
 
 #### % grassy ----
 perc_grassy_bw_billjones = boxplot(BJ2$perc_grassy, 
-                                     main = "Randoms for % grassy in BJ", 
+                                     main = "Randoms (2:1) for % grassy in BJ", 
                                      ylab = "Average", 
                                      xlab = "% grassy") 
 abline(h = 0.0728, col = "purple")

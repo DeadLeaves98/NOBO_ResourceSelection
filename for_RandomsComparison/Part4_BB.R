@@ -182,7 +182,7 @@ for(i in 1:length(unique(BB$Bird.ID))){
   
   # generates random points
   bb_course_i_sh2 <- st_as_sf(bb_shp) # convert to sf
-  bb_points1 = st_sample(bb_course_i_sh2, size = nrow(bb_nobo_i) * 5) # generate 2 random points for ebjh "used" point using st_sample()
+  bb_points1 = st_sample(bb_course_i_sh2, size = nrow(bb_nobo_i) *10) # generate 2 random points for ebjh "used" point using st_sample()
   bb_points1 <- as_Spatial(bb_points1) # convert bbjk to sp
   plot(bb_shp); plot(bb_points1, add = TRUE, col = "red"); plot(bb_nobo_i_spatial, add = TRUE, col = "blue") # plot to confirm it worked
   bb_points2 <- spTransform(bb_points1, CRS("+init=epsg:4326")) # convert to lat/long because this is what nobo1 uses
@@ -190,7 +190,8 @@ for(i in 1:length(unique(BB$Bird.ID))){
   # NEW: We need to add random coordinates to a dataframe that will 
   
   # generate pseudo-dates for the randoms
-  random_dates <- c(bb_nobo_i$Date, bb_nobo_i$Date, bb_nobo_i$Date, bb_nobo_i$Date,bb_nobo_i$Date) # for every random generated for each pt, another copy and paste "bb_nobo_i$Date" will need to be done
+  random_dates <- c(bb_nobo_i$Date, bb_nobo_i$Date, bb_nobo_i$Date, bb_nobo_i$Date, bb_nobo_i$Date, bb_nobo_i$Date,
+                    bb_nobo_i$Date, bb_nobo_i$Date, bb_nobo_i$Date, bb_nobo_i$Date) # for every random generated for each pt, another copy and paste "bb_nobo_i$Date" will need to be done
   
   # Create an empty for randoms suitable for rbind()
   head(BB2) # take a look at NOBO data.frame
@@ -306,7 +307,7 @@ abline(h = 0.562, col = "purple")
 
 #### % grassy ----
 perc_grassy_bw_bigbay = boxplot(BB2$perc_grassy, 
-                                   main = "Randoms for % grassy in BB", 
+                                   main = "Randoms (2:1) for % grassy in BB", 
                                    ylab = "Average", 
                                    xlab = "% grassy") 
 abline(h = 0.0316, col = "purple")
@@ -320,7 +321,7 @@ abline(h = 0.231, col = "purple")
 
 #### % BF ----
 perc_bf_bw_bigbay = boxplot(BB2$perc_bf, 
-                               main = "Randoms for % bf in BB", 
+                               main = "Randoms (2:1) for % bf in BB", 
                                ylab = "Average", 
                                xlab = "% bf") 
 abline(h = 0.0100, col = "purple")
