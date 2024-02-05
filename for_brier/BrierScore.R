@@ -56,6 +56,7 @@ for(i in 1:10){
   newrow <- c(i, round(aucvalue,2), round(brierval,2))
   AUCTable <- rbind(AUCTable, newrow)
 }
+
 AUCTable <- AUCTable[2:11,]
 AUCTable
 mean(AUCTable$BrierScore)
