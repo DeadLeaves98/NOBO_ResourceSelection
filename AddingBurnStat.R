@@ -26,10 +26,8 @@ nobo_c$BurnDate1 = as.Date(nobo_c$BurnDate1, "%Y-%m-%d")
 nobo_c$BurnDate2 = test$X2
 nobo_c$BurnDate2 = as.Date(nobo_c$BurnDate2, "%Y-%m-%d")
 
-head(nobo_c)
-
-nobo_c = select(nobo_c, -23)
-nobo_c = select(nobo_c, -6)
+nobo_c = dplyr::select(nobo_c, -23) # remove the "burn_hist" containing both 
+nobo_c = dplyr::select(nobo_c, -6) # removes week column 
 
 # now to make the ifelse statement: If the date of the observation is greater
 # than the BurnDate1 column then it gets a 1, if not then it gets a 0
@@ -58,11 +56,11 @@ nobo0 = subset(nobo_c, LastBurn == 0) #subset to those thats last burn date is i
 head(nobo1)
 
 nobo1$LastBurn = nobo1$BurnDate1 #change the name for an rbind 
-nobo1 = select(nobo1, -"BurnDate2", -"BurnDate1") # delete the two columns I dont need anymore 
+nobo1 = dplyr::select(nobo1, -"BurnDate2", -"BurnDate1") # delete the two columns I dont need anymore 
 
 #repeat
 nobo0$LastBurn = nobo0$BurnDate2 #change the name for an rbind 
-nobo0 = select(nobo0, -"BurnDate2", -"BurnDate1") # delete the two columns I dont need anymore 
+nobo0 = dplyr::select(nobo0, -"BurnDate2", -"BurnDate1") # delete the two columns I dont need anymore 
 
 # #combine the two back together.
 nobo_c2 = rbind(nobo0, nobo1) # NOTE: this currently does not include any observations that had NA in the Burn columns 
@@ -71,7 +69,7 @@ nobo_c2 = rbind(nobo0, nobo1) # NOTE: this currently does not include any observ
 # cries internnally because there was probably a more concise way of doing all this and now we are here 
 
 head(TheNA)
-TheNA = select(TheNA, -"BurnDate2", -"BurnDate1") # delete the two columns I dont need anymore 
+TheNA = dplyr::select(TheNA, -"BurnDate2", -"BurnDate1") # delete the two columns I dont need anymore 
 nobo_c2 = rbind(nobo_c2, TheNA)
 nrow(nobo_c2) # check to see if its the same number as we started? YESSSS
 
@@ -115,3 +113,5 @@ nobo_c3 = rbind(nobo23, nobo22)
 ###############################################################################
 
 # burn stat is now added. We can now proceed with the models again. 
+
+write.csv(nobo_c3, "./ResSelData_Course2.CSV")

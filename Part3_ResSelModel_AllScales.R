@@ -19,16 +19,32 @@ summary(MCP_mod) # to look at confidence intervals and est
 hist(nobo_MCP$DTN_road)
 hist(scale(nobo_MCP$DTN_road))
 
-#### Course: Resource Selection Model ---- 
-nobo_Course = read.csv("./ResSelData_Course.csv")
-nobo_Course[,11:22] <- scale(nobo_Course[,11:22]) # scale all the variables
 
-Course_mod = glmer(response ~ DTN_road + perc_grassy + perc_bf + ndvi +(1|Bird.ID), family = binomial, data = nobo_Course)
+
+
+
+
+
+#### Course: Resource Selection Model ---- 
+# WARNING: USING UPDATED COURSE DATA ~~~ !!! @@@@@ 
+nobo_Course = read.csv("./ResSelData_Course2.csv") #TO NOTE: I AM USING THE UPDATED DATA WITH BURN HIST
+nobo_Course[,11:22] <- scale(nobo_Course[,11:22]) # scale all the variables
+nobo_Course[,24:25] <- scale(nobo_Course[,24:25]) # scale all the variables
+
+Course_mod = glmer(response ~ DTN_road + perc_grassy + perc_bf + ndvi + Daysinceburn + burn_stat + perc_burn  + (1|Bird.ID), family = binomial, data = nobo_Course)
 summary(Course_mod)
+
+
+
+
+
+
+
+
 
 #### Property AKA orton: Resource Selection Model ---- 
 nobo_Property = read.csv("./ResSelData_Property.csv")
-nobo_Property[,11:22] <- scale(nobo_Property[,11:22]) # scale all the variables
+nobo_Property[,11:22, 24:25] <- scale(nobo_Property[,11:22, 24:25]) # scale all the variables
 
 Property_mod = glmer(response ~ DTN_road + perc_grassy + perc_bf + ndvi +(1|Bird.ID), family = binomial, data = nobo_Property)
 summary(Property_mod)

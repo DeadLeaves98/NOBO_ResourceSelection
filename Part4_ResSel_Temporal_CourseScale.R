@@ -24,43 +24,44 @@
 
 ##############################################################################
 # COURSE ----
-nobo_c = read.csv("./ResSelData_Course.csv") # read in the course level data 
+nobo_c = read.csv("./ResSelData_Course2.csv") # read in the course level data 
 nobo_c[,11:22] <- scale(nobo_c[,11:22]) # scale all the variables
+nobo_c[,24:25] <- scale(nobo_c[,24:25]) # scale all the variables
 length(unique(nobo_c$Bird.ID)) #588
 
 
 ## models ----
-Course_mod = glmer(response ~ DTN_road + perc_grassy + perc_bf + ndvi +(1|Bird.ID), family = binomial, data = nobo_c)
+
+Course_mod = glmer(response ~ DTN_road + perc_grassy + perc_bf + ndvi + Daysinceburn + burn_stat + perc_burn  + (1|Bird.ID), family = binomial, data = nobo_c)
 summary(Course_mod)
 
-saveRDS(Course_mod, file = "All_Course_mod.rds")
+saveRDS(Course_mod, file = "All_Course_mod2.rds")
 
 
 # ANNUAL ----
-nobo_c = read.csv("./ResSelData_Course.csv") # read in the course level data 
+nobo_c = read.csv("./ResSelData_Course2.csv") # read in the course level data 
 nobo_c[,11:22] <- scale(nobo_c[,11:22]) # scale all the variables
-
-
+nobo_c[,24:25] <- scale(nobo_c[,24:25]) # scale all the variables
 #by year data subset
 annual22 <- nobo_c[nobo_c$Date >= "2022-01-01" & nobo_c$Date <= "2022-12-31", ]
 annual23 <- nobo_c[nobo_c$Date >= "2023-01-01" & nobo_c$Date <= "2023-12-31", ]
 nrow(annual22) # 35664
 nrow(annual23) # 36897
 
-write.csv(annual22, "./year2022_ResSelData_Course.csv")
-write.csv(annual23, "./year2023_ResSelData_Course.csv")
+#write.csv(annual22, "./year2022_ResSelData_Course.csv")
+#write.csv(annual23, "./year2023_ResSelData_Course.csv")
 
 ## Models ----
 library(dotwhisker); library(dplyr); library(lme4)
 
-annual22_mod = glmer(response ~ DTN_road + perc_grassy + perc_bf + ndvi +(1|Bird.ID), family = binomial, data = annual22)
-annual23_mod = glmer(response ~ DTN_road + perc_grassy + perc_bf + ndvi +(1|Bird.ID), family = binomial, data = annual23)
+annual22_mod = glmer(response ~ DTN_road + perc_grassy + perc_bf + ndvi + Daysinceburn + burn_stat + perc_burn +(1|Bird.ID), family = binomial, data = annual22)
+annual23_mod = glmer(response ~ DTN_road + perc_grassy + perc_bf + ndvi +Daysinceburn + burn_stat + perc_burn +(1|Bird.ID), family = binomial, data = annual23)
 summary(annual22_mod)
 summary(annual23_mod)
 # (st error * 1.96) + or - to estimate 
 
-saveRDS(annual22_mod, file = "year22_Course_mod.rds")
-saveRDS(annual23_mod, file = "year23_Course_mod.rds")
+saveRDS(annual22_mod, file = "year22_Course_mod2.rds")
+saveRDS(annual23_mod, file = "year23_Course_mod2.rds")
 
 ## Figure ----
 year_mods = list(annual22_mod, annual23_mod)
@@ -72,7 +73,7 @@ Fig6_ResSel_Annual = dwplot(year_mods,
                                 model_order = NULL, 
                                 dot_args = list(size = 3), 
                                 vline = geom_vline(xintercept = 0, linetype = 2, colour ="grey8"), 
-                                vars_order = c("DTN_road", "perc_grassy", "perc_bf", "ndvi")) %>% # plot line at zero _behind_coefs
+                                vars_order = c("DTN_road", "perc_grassy", "perc_bf", "ndvi", "Daysinceburn", "burn_stat", "perc_burn")) %>% # plot line at zero _behind_coefs
   relabel_predictors(
     c(
       DTN_road = "Distance to Nearest Road",
@@ -105,20 +106,20 @@ nrow(nonbreeding) # 17826
 
 
 #
-write.csv(nonbreeding, "./nonbreeding_ResSelData_Course.csv")
-write.csv(breeding, "./breeding_ResSelData_Course.csv")
+# write.csv(nonbreeding, "./nonbreeding_ResSelData_Course.csv")
+# write.csv(breeding, "./breeding_ResSelData_Course.csv")
 
 
 ## Models ---- 
 library(dotwhisker); library(dplyr); library(lme4)
 
-nonbreeding_mod = glmer(response ~ DTN_road + perc_grassy + perc_bf + ndvi +(1|Bird.ID), family = binomial, data = nonbreeding)
-breeding_mod = glmer(response ~ DTN_road + perc_grassy + perc_bf + ndvi +(1|Bird.ID), family = binomial, data = breeding)
+nonbreeding_mod = glmer(response ~ DTN_road + perc_grassy + perc_bf + ndvi + Daysinceburn + burn_stat + perc_burn +(1|Bird.ID), family = binomial, data = nonbreeding)
+breeding_mod = glmer(response ~ DTN_road + perc_grassy + perc_bf + ndvi + Daysinceburn + burn_stat + perc_burn +(1|Bird.ID), family = binomial, data = breeding)
 summary(breeding_mod)
 summary(nonbreeding_mod)
 
-saveRDS(nonbreeding_mod , file = "NONBr_Course_mod.rds")
-saveRDS(breeding_mod, file = "Br_Course_mod.rds")
+saveRDS(nonbreeding_mod , file = "NONBr_Course_mod2.rds")
+saveRDS(breeding_mod, file = "Br_Course_mod2.rds")
 
 ## Figure ----
 
@@ -136,7 +137,7 @@ Fig1_biannual = dwplot(bi_annual_mods,
                       model_order = NULL, 
                       dot_args = list(size = 3), 
                       vline = geom_vline(xintercept = 0, linetype = 2, colour ="grey8"), 
-                      vars_order = c("DTN_road", "perc_grassy", "perc_bf", "ndvi")) %>% # plot line at zero _behind_coefs
+                      vars_order = c("DTN_road", "perc_grassy", "perc_bf", "ndvi", "Daysinceburn", "burn_stat", "perc_burn")) %>% # plot line at zero _behind_coefs
   relabel_predictors(
     c(
       DTN_road = "Distance to Nearest Road",
@@ -158,8 +159,8 @@ Fig1_biannual + xlim(c(-1,1)) + coord_flip()
 #SEASON ---- 
 
 # Already ran this in but just in case 
-nobo_c = read.csv("./ResSelData_Course.csv") # read in the course level data 
-nobo_c[,11:22] <- scale(nobo_c[,11:22]) # scale all the variables
+# nobo_c = read.csv("./ResSelData_Course.csv") # read in the course level data 
+# nobo_c[,11:22] <- scale(nobo_c[,11:22]) # scale all the variables
 
 # Meteorological Seasons
 # spring runs from March 1 to May 31; summer runs from June 1 to August 31; fall
@@ -186,27 +187,27 @@ winter22 = nobo_c[nobo_c$Date >= "2022-12-01" & nobo_c$Date <= "2023-02-28", ]
 winter23 = nobo_c[nobo_c$Date >= "2023-12-01" & nobo_c$Date <= "2024-02-28", ]
 winter = rbind(winter22, winter23)
 
-write.csv(spring, "./spring_ResSelData_Course.csv")
-write.csv(summer, "./summer_ResSelData_Course.csv")
-write.csv(fall, "./fall_ResSelData_Course.csv")
-write.csv(winter, "./winter_ResSelData_Course.csv")
+# write.csv(spring, "./spring_ResSelData_Course.csv")
+# write.csv(summer, "./summer_ResSelData_Course.csv")
+# write.csv(fall, "./fall_ResSelData_Course.csv")
+# write.csv(winter, "./winter_ResSelData_Course.csv")
 
 ## Models  #### 
 
-spring_mod = glmer(response ~ DTN_road + perc_grassy + perc_bf + ndvi +(1|Bird.ID), family = binomial, data = spring)
-summer_mod = glmer(response ~ DTN_road + perc_grassy + perc_bf + ndvi +(1|Bird.ID), family = binomial, data = summer)
-fall_mod = glmer(response ~ DTN_road + perc_grassy + perc_bf + ndvi +(1|Bird.ID), family = binomial, data = fall)
-winter_mod = glmer(response ~ DTN_road + perc_grassy + perc_bf + ndvi +(1|Bird.ID), family = binomial, data = winter)
+spring_mod = glmer(response ~ DTN_road + perc_grassy + perc_bf + ndvi + Daysinceburn + burn_stat + perc_burn + (1|Bird.ID), family = binomial, data = spring)
+summer_mod = glmer(response ~ DTN_road + perc_grassy + perc_bf + ndvi + Daysinceburn + burn_stat + perc_burn +(1|Bird.ID), family = binomial, data = summer)
+fall_mod = glmer(response ~ DTN_road + perc_grassy + perc_bf + ndvi + Daysinceburn + burn_stat + perc_burn +(1|Bird.ID), family = binomial, data = fall)
+winter_mod = glmer(response ~ DTN_road + perc_grassy + perc_bf + ndvi + Daysinceburn + burn_stat + perc_burn +(1|Bird.ID), family = binomial, data = winter)
 
 summary(spring_mod)
 summary(summer_mod)
 summary(fall_mod)
 summary(winter_mod)
 
-saveRDS(spring_mod, file = "spring_Course_mod.rds")
-saveRDS(summer_mod, file = "summer_Course_mod.rds")
-saveRDS(fall_mod, file = "fall_Course_mod.rds")
-saveRDS(winter_mod, file = "winter_Course_mod.rds")
+saveRDS(spring_mod, file = "spring_Course_mod2.rds")
+saveRDS(summer_mod, file = "summer_Course_mod2.rds")
+saveRDS(fall_mod, file = "fall_Course_mod2.rds")
+saveRDS(winter_mod, file = "winter_Course_mod2.rds")
 
 
 ## Figure ----
@@ -224,7 +225,7 @@ Fig2_seasonal = dwplot(list(spring_mod, summer_mod, fall_mod, winter_mod),
                        model_order = NULL, 
                        dot_args = list(size = 3), 
                        vline = geom_vline(xintercept = 0, linetype = 2, colour ="grey8"), 
-                       vars_order = c("DTN_road", "perc_grassy", "perc_bf", "ndvi")) %>% # plot line at zero _behind_coefs
+                       vars_order = c("DTN_road", "perc_grassy", "perc_bf", "ndvi", "Daysinceburn", "burn_stat", "perc_burn")) %>% # plot line at zero _behind_coefs
   relabel_predictors(
     c(
       DTN_road = "Distance to Nearest Road",
@@ -246,8 +247,8 @@ Fig2_seasonal + xlim(c(-1,1)) + coord_flip()
 # 2 MONTH  ----
 
 # Already ran this in but just in case 
-nobo_c = read.csv("./ResSelData_Course.csv") # read in the course level data 
-nobo_c[,11:22] <- scale(nobo_c[,11:22]) # scale all the variables
+#nobo_c = read.csv("./ResSelData_Course.csv") # read in the course level data 
+#nobo_c[,11:22] <- scale(nobo_c[,11:22]) # scale all the variables
 
 # January - February 
 jf_22 = nobo_c[nobo_c$Date >= "2022-01-01" & nobo_c$Date <= "2022-02-28", ]
@@ -287,23 +288,23 @@ nrow(nd) # 21612
 
 
 
-write.csv(jf, "./jf_ResSelData_Course.csv")
-write.csv(ma, "./ma_ResSelData_Course.csv")
-write.csv(mj, "./mj_ResSelData_Course.csv")
-write.csv(ja, "./ja_ResSelData_Course.csv")
-write.csv(so, "./so_ResSelData_Course.csv")
-write.csv(nd, "./nd_ResSelData_Course.csv")
+# write.csv(jf, "./jf_ResSelData_Course.csv")
+# write.csv(ma, "./ma_ResSelData_Course.csv")
+# write.csv(mj, "./mj_ResSelData_Course.csv")
+# write.csv(ja, "./ja_ResSelData_Course.csv")
+# write.csv(so, "./so_ResSelData_Course.csv")
+# write.csv(nd, "./nd_ResSelData_Course.csv")
 
 
 
 ## Models  #### 
 
-jf_mod = glmer(response ~ DTN_road + perc_grassy + perc_bf + ndvi +(1|Bird.ID), family = binomial, data = jf)
-ma_mod = glmer(response ~ DTN_road + perc_grassy + perc_bf + ndvi +(1|Bird.ID), family = binomial, data = ma)
-mj_mod = glmer(response ~ DTN_road + perc_grassy + perc_bf + ndvi +(1|Bird.ID), family = binomial, data = mj)
-ja_mod = glmer(response ~ DTN_road + perc_grassy + perc_bf + ndvi +(1|Bird.ID), family = binomial, data = ja)
-so_mod = glmer(response ~ DTN_road + perc_grassy + perc_bf + ndvi +(1|Bird.ID), family = binomial, data = so)
-nd_mod = glmer(response ~ DTN_road + perc_grassy + perc_bf + ndvi +(1|Bird.ID), family = binomial, data = nd)
+jf_mod = glmer(response ~ DTN_road + perc_grassy + perc_bf + ndvi + Daysinceburn + burn_stat + perc_burn +(1|Bird.ID), family = binomial, data = jf)
+ma_mod = glmer(response ~ DTN_road + perc_grassy + perc_bf + ndvi + Daysinceburn + burn_stat + perc_burn +(1|Bird.ID), family = binomial, data = ma)
+mj_mod = glmer(response ~ DTN_road + perc_grassy + perc_bf + ndvi + Daysinceburn + burn_stat + perc_burn +(1|Bird.ID), family = binomial, data = mj)
+ja_mod = glmer(response ~ DTN_road + perc_grassy + perc_bf + ndvi + Daysinceburn + burn_stat + perc_burn +(1|Bird.ID), family = binomial, data = ja)
+so_mod = glmer(response ~ DTN_road + perc_grassy + perc_bf + ndvi + Daysinceburn + burn_stat + perc_burn +(1|Bird.ID), family = binomial, data = so)
+nd_mod = glmer(response ~ DTN_road + perc_grassy + perc_bf + ndvi + Daysinceburn + burn_stat + perc_burn +(1|Bird.ID), family = binomial, data = nd)
 
 summary(jf_mod)
 summary(ma_mod)
@@ -312,12 +313,12 @@ summary(ja_mod)
 summary(so_mod)
 summary(nd_mod)
 
-saveRDS(jf_mod, file = "jf_Course_mod.rds")
-saveRDS(ma_mod, file = "ma_Course_mod.rds")
-saveRDS(mj_mod, file = "mj_Course_mod.rds")
-saveRDS(ja_mod, file = "ja_Course_mod.rds")
-saveRDS(so_mod, file = "so_Course_mod.rds")
-saveRDS(nd_mod, file = "nd_Course_mod.rds")
+saveRDS(jf_mod, file = "jf_Course_mod2.rds")
+saveRDS(ma_mod, file = "ma_Course_mod2.rds")
+saveRDS(mj_mod, file = "mj_Course_mod2.rds")
+saveRDS(ja_mod, file = "ja_Course_mod2.rds")
+saveRDS(so_mod, file = "so_Course_mod2.rds")
+saveRDS(nd_mod, file = "nd_Course_mod2.rds")
 
 
 
@@ -331,7 +332,7 @@ Fig3_month_2interv = dwplot(month_2interv_mods,
                        model_order = NULL, 
                        dot_args = list(size = 3), 
                        vline = geom_vline(xintercept = 0, linetype = 2, colour ="grey8"), 
-                       vars_order = c("DTN_road", "perc_grassy", "perc_bf", "ndvi")) %>% # plot line at zero _behind_coefs
+                       vars_order = c("DTN_road", "perc_grassy", "perc_bf", "ndvi", "Daysinceburn", "burn_stat", "perc_burn")) %>% # plot line at zero _behind_coefs
   relabel_predictors(
     c(
       DTN_road = "Distance to Nearest Road",
@@ -351,8 +352,8 @@ Fig3_month_2interv + xlim(c(-1,1)) + coord_flip()
 ###############################################################################
 ###############################################################################
 # MONTH  ####
-nobo_c = read.csv("./ResSelData_Course.csv") # read in the course level data 
-nobo_c[,11:22] <- scale(nobo_c[,11:22]) # scale all the variables
+# nobo_c = read.csv("./ResSelData_Course.csv") # read in the course level data 
+# nobo_c[,11:22] <- scale(nobo_c[,11:22]) # scale all the variables
 
 
 # January  
@@ -430,36 +431,36 @@ nrow(dec) # 678
 
 
 
-write.csv(jan, "./jan_ResSelData_Course.csv")
-write.csv(feb, "./feb_ResSelData_Course.csv")
-write.csv(mar, "./mar_ResSelData_Course.csv")
-write.csv(apr, "./apr_ResSelData_Course.csv")
-write.csv(may, "./may_ResSelData_Course.csv")
-write.csv(jun, "./jun_ResSelData_Course.csv")
-write.csv(jul, "./jul_ResSelData_Course.csv")
-write.csv(aug, "./aug_ResSelData_Course.csv")
-write.csv(sept, "./sept_ResSelData_Course.csv")
-write.csv(oct, "./oct_ResSelData_Course.csv")
-write.csv(nov, "./nov_ResSelData_Course.csv")
-write.csv(dec, "./dec_ResSelData_Course.csv")
+#write.csv(jan, "./jan_ResSelData_Course.csv")
+#write.csv(feb, "./feb_ResSelData_Course.csv")
+#write.csv(mar, "./mar_ResSelData_Course.csv")
+#write.csv(apr, "./apr_ResSelData_Course.csv")
+#write.csv(may, "./may_ResSelData_Course.csv")
+#write.csv(jun, "./jun_ResSelData_Course.csv")
+#write.csv(jul, "./jul_ResSelData_Course.csv")
+#write.csv(aug, "./aug_ResSelData_Course.csv")
+#write.csv(sept, "./sept_ResSelData_Course.csv")
+#write.csv(oct, "./oct_ResSelData_Course.csv")
+#write.csv(nov, "./nov_ResSelData_Course.csv")
+#write.csv(dec, "./dec_ResSelData_Course.csv")
 
 
 
 
 
 #### Models  ----
-jan_mod = glmer(response ~ DTN_road + perc_grassy + perc_bf + ndvi +(1|Bird.ID), family = binomial, data = jan)
-feb_mod = glmer(response ~ DTN_road + perc_grassy + perc_bf + ndvi +(1|Bird.ID), family = binomial, data = feb)
-mar_mod = glmer(response ~ DTN_road + perc_grassy + perc_bf + ndvi +(1|Bird.ID), family = binomial, data = mar)
-apr_mod = glmer(response ~ DTN_road + perc_grassy + perc_bf + ndvi +(1|Bird.ID), family = binomial, data = apr)
-may_mod = glmer(response ~ DTN_road + perc_grassy + perc_bf + ndvi +(1|Bird.ID), family = binomial, data = may)
-jun_mod = glmer(response ~ DTN_road + perc_grassy + perc_bf + ndvi +(1|Bird.ID), family = binomial, data = jun)
-jul_mod = glmer(response ~ DTN_road + perc_grassy + perc_bf + ndvi +(1|Bird.ID), family = binomial, data = jul)
-aug_mod = glmer(response ~ DTN_road + perc_grassy + perc_bf + ndvi +(1|Bird.ID), family = binomial, data = aug)
-sept_mod = glmer(response ~ DTN_road + perc_grassy + perc_bf + ndvi +(1|Bird.ID), family = binomial, data = sept)
-oct_mod = glmer(response ~ DTN_road + perc_grassy + perc_bf + ndvi +(1|Bird.ID), family = binomial, data = oct)
-nov_mod = glmer(response ~ DTN_road + perc_grassy + perc_bf + ndvi +(1|Bird.ID), family = binomial, data = nov)
-dec_mod = glmer(response ~ DTN_road + perc_grassy + perc_bf + ndvi +(1|Bird.ID), family = binomial, data = dec)
+jan_mod = glmer(response ~ DTN_road + perc_grassy + perc_bf + ndvi + Daysinceburn + burn_stat + perc_burn + (1|Bird.ID), family = binomial, data = jan)
+feb_mod = glmer(response ~ DTN_road + perc_grassy + perc_bf + ndvi + Daysinceburn + burn_stat + perc_burn + (1|Bird.ID), family = binomial, data = feb)
+mar_mod = glmer(response ~ DTN_road + perc_grassy + perc_bf + ndvi + Daysinceburn + burn_stat + perc_burn + (1|Bird.ID), family = binomial, data = mar)
+apr_mod = glmer(response ~ DTN_road + perc_grassy + perc_bf + ndvi + Daysinceburn + burn_stat + perc_burn + (1|Bird.ID), family = binomial, data = apr)
+may_mod = glmer(response ~ DTN_road + perc_grassy + perc_bf + ndvi + Daysinceburn + burn_stat + perc_burn + (1|Bird.ID), family = binomial, data = may)
+jun_mod = glmer(response ~ DTN_road + perc_grassy + perc_bf + ndvi + Daysinceburn + burn_stat + perc_burn + (1|Bird.ID), family = binomial, data = jun)
+jul_mod = glmer(response ~ DTN_road + perc_grassy + perc_bf + ndvi + Daysinceburn + burn_stat + perc_burn + (1|Bird.ID), family = binomial, data = jul)
+aug_mod = glmer(response ~ DTN_road + perc_grassy + perc_bf + ndvi + Daysinceburn + burn_stat + perc_burn + (1|Bird.ID), family = binomial, data = aug)
+sept_mod = glmer(response ~ DTN_road + perc_grassy + perc_bf + ndvi + Daysinceburn + burn_stat + perc_burn + (1|Bird.ID), family = binomial, data = sept)
+oct_mod = glmer(response ~ DTN_road + perc_grassy + perc_bf + ndvi + Daysinceburn + burn_stat + perc_burn + (1|Bird.ID), family = binomial, data = oct)
+nov_mod = glmer(response ~ DTN_road + perc_grassy + perc_bf + ndvi + Daysinceburn + burn_stat + perc_burn + (1|Bird.ID), family = binomial, data = nov)
+dec_mod = glmer(response ~ DTN_road + perc_grassy + perc_bf + ndvi + Daysinceburn + burn_stat + perc_burn + (1|Bird.ID), family = binomial, data = dec)
 
 summary(jan_mod)
 summary(feb_mod)
@@ -474,18 +475,18 @@ summary(oct_mod)
 summary(nov_mod)
 summary(dec_mod)
 
-saveRDS(jan_mod, file = "jan_Course_mod.rds")
-saveRDS(feb_mod, file = "feb_Course_mod.rds")
-saveRDS(mar_mod, file = "mar_Course_mod.rds")
-saveRDS(apr_mod, file = "apr_Course_mod.rds")
-saveRDS(may_mod, file = "may_Course_mod.rds")
-saveRDS(jun_mod, file = "jun_Course_mod.rds")
-saveRDS(jul_mod, file = "jul_Course_mod.rds")
-saveRDS(aug_mod, file = "aug_Course_mod.rds")
-saveRDS(sept_mod, file = "sept_Course_mod.rds")
-saveRDS(oct_mod, file = "oct_Course_mod.rds")
-saveRDS(nov_mod, file = "nov_Course_mod.rds")
-saveRDS(dec_mod, file = "dec_Course_mod.rds")
+saveRDS(jan_mod, file = "jan_Course_mod2.rds")
+saveRDS(feb_mod, file = "feb_Course_mod2.rds")
+saveRDS(mar_mod, file = "mar_Course_mod2.rds")
+saveRDS(apr_mod, file = "apr_Course_mod2.rds")
+saveRDS(may_mod, file = "may_Course_mod2.rds")
+saveRDS(jun_mod, file = "jun_Course_mod2.rds")
+saveRDS(jul_mod, file = "jul_Course_mod2.rds")
+saveRDS(aug_mod, file = "aug_Course_mod2.rds")
+saveRDS(sept_mod, file = "sept_Course_mod2.rds")
+saveRDS(oct_mod, file = "oct_Course_mod2.rds")
+saveRDS(nov_mod, file = "nov_Course_mod2.rds")
+saveRDS(dec_mod, file = "dec_Course_mod2.rds")
 
 
 
@@ -500,7 +501,7 @@ Fig4_month = dwplot(month_mod,
                             model_order = NULL, 
                             dot_args = list(size = 3), 
                             vline = geom_vline(xintercept = 0, linetype = 2, colour ="grey8"), 
-                            vars_order = c("DTN_road", "perc_grassy", "perc_bf", "ndvi")) %>% # plot line at zero _behind_coefs
+                            vars_order = c("DTN_road", "perc_grassy", "perc_bf", "ndvi", "Daysinceburn", "burn_stat", "perc_burn")) %>% # plot line at zero _behind_coefs
   relabel_predictors(
     c(
       DTN_road = "Distance to Nearest Road",
