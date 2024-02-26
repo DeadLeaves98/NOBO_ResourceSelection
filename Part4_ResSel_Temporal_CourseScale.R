@@ -21,7 +21,8 @@
 # to achieve the desired results due to heterogeneity of the landscape (e.g. soil quality, vegetation 
 # cover, proximity to urban neighborhoods). This is mainly referencing below the creek and above the creek 
 # Maybe this is not a sound thought process -- we should discuss 
-
+library(rgdal); library(raster); library(adehabitatHR); library(rgeos); library(sf); library(dplyr)
+library(lubridate); library(stringr); library(hablar); library(AICcmodavg);  library(lme4); library(lwgeom); library(ggplot2)
 ##############################################################################
 # COURSE ----
 nobo_c = read.csv("./ResSelData_Course2.csv") # read in the course level data 
@@ -29,6 +30,14 @@ nobo_c[,11:22] <- scale(nobo_c[,11:22]) # scale all the variables
 nobo_c[,24:25] <- scale(nobo_c[,24:25]) # scale all the variables
 length(unique(nobo_c$Bird.ID)) #588
 
+nrow(nobo_c)
+
+## to get the averages for the reals 
+#View(nobo_c)
+
+birdavg = subset(nobo_c, response == "1")
+nrow(birdavg) # oh we have more than I thought?
+summary(birdavg)
 
 ## models ----
 
@@ -36,6 +45,37 @@ Course_mod = glmer(response ~ DTN_road + perc_grassy + perc_bf + ndvi + Daysince
 summary(Course_mod)
 
 saveRDS(Course_mod, file = "All_Course_mod2.rds")
+
+# dot whisker plot with editing 
+Fig1_all = dwplot(Course_mod,
+                       ci = 0.95, 
+                       dodge_size = .5, # how far apart pts are frome eachother (0.4 = default) 
+                       show_intercept = FALSE, 
+                       model_order = NULL, 
+                       dot_args = list(size = 3),
+                       whisker_args = list(size = 0.8),
+                       vline = geom_vline(xintercept = 0, linetype = 2, colour ="grey8"), 
+                       vars_order = c("DTN_road", "perc_grassy", "perc_bf", "ndvi", "Daysinceburn", "perc_burn")) %>% # plot line at zero _behind_coefs
+  relabel_predictors(
+    c(
+      DTN_road = "Distance to Feedline",
+      perc_grassy = "Percent Grassfield",
+      perc_bf = "Percent Broodfield",
+      ndvi = "NDVI", 
+      Daysinceburn = "Days Since Burn", 
+      perc_burn = "Percent Burn")
+  ) +
+  theme_bw() + xlab("Coefficient Estimate") + ylab("") + 
+  scale_color_discrete(name = "Full Year Model", labels = c("Full Year"), type = c('slateblue2', 'slateblue4')) # labels the legend then the models, then assigns colors 
+
+Fig1_all + xlim(c(-.7,.7)) +
+  theme(text = element_text(size=15),
+ axis.text.x = element_text(angle=25, hjust=1)) 
+
+
+
+
+
 
 
 # ANNUAL ----
@@ -137,19 +177,23 @@ Fig1_biannual = dwplot(bi_annual_mods,
                       model_order = NULL, 
                       dot_args = list(size = 3), 
                       vline = geom_vline(xintercept = 0, linetype = 2, colour ="grey8"), 
-                      vars_order = c("DTN_road", "perc_grassy", "perc_bf", "ndvi", "Daysinceburn", "burn_stat", "perc_burn")) %>% # plot line at zero _behind_coefs
+                      vars_order = c("DTN_road", "perc_grassy", "perc_bf", "ndvi", "Daysinceburn", "perc_burn")) %>% # plot line at zero _behind_coefs
   relabel_predictors(
     c(
       DTN_road = "Distance to Nearest Road",
-      perc_grassy = "Percent Grassy",
+      perc_grassy = "Percent Grassfield",
       perc_bf = "Percent Broodfield",
-      ndvi = "NDVI")
+      ndvi = "NDVI", 
+      daysinceburn = "Days Since Burn", 
+      perc_burn = "Percent Burn")
   ) +
   
   theme_bw() + xlab("Coefficient Estimate") + ylab("") + 
   scale_color_discrete(name = "Bi-Annual Course Model", labels = c("Breeding", "Non-breeding"), type = c('slateblue2', 'slateblue4'))# labels the legend then the models, then assigns colors 
-Fig1_biannual + xlim(c(-1,1)) + coord_flip()
-
+Fig1_biannual + xlim(c(-.7,.7)) +
+  theme(text = element_text(size=15),
+        axis.text.x = element_text(angle=25, hjust=1), 
+        legend.text = element_text(size = 20))
 
 
 ###################################################################################
@@ -225,20 +269,26 @@ Fig2_seasonal = dwplot(list(spring_mod, summer_mod, fall_mod, winter_mod),
                        model_order = NULL, 
                        dot_args = list(size = 3), 
                        vline = geom_vline(xintercept = 0, linetype = 2, colour ="grey8"), 
-                       vars_order = c("DTN_road", "perc_grassy", "perc_bf", "ndvi", "Daysinceburn", "burn_stat", "perc_burn")) %>% # plot line at zero _behind_coefs
+                       vars_order = c("DTN_road", "perc_grassy", "perc_bf", "ndvi", "Daysinceburn", "perc_burn")) %>% # plot line at zero _behind_coefs
   relabel_predictors(
     c(
       DTN_road = "Distance to Nearest Road",
       perc_grassy = "Percent Grassy",
       perc_bf = "Percent Broodfield",
-      ndvi = "NDVI")
+      ndvi = "NDVI", 
+      Daysinceburn = "Days Since Burn", 
+      perc_burn = "Percent Burn")
   ) +
   
   theme_bw() + xlab("Coefficient Estimate") + ylab("") + 
-  scale_color_discrete(name = "Seasonal Course Model", labels = c("Spring", "Summer", "Fall", "Winter"), type = c('thistle2', 'plum3', 'slateblue2', 'slateblue4'))# labels the legend then the models, then assigns colors 
+  scale_color_discrete(name = "Seasonal Course Model", labels = c("Spring", "Summer", "Fall", "Winter"), type = c('orchid2', 'green2', 'orangered', 'dodgerblue'))# labels the legend then the models, then assigns colors 
 
 
-Fig2_seasonal + xlim(c(-1,1)) + coord_flip()
+Fig2_seasonal + xlim(c(-1,1)) +
+  theme(text = element_text(size=15),
+        axis.text.x = element_text(angle=25, hjust=1), 
+        legend.text = element_text(size = 20))
+
 
 
 ###################################################################################
@@ -332,21 +382,27 @@ Fig3_month_2interv = dwplot(month_2interv_mods,
                        model_order = NULL, 
                        dot_args = list(size = 3), 
                        vline = geom_vline(xintercept = 0, linetype = 2, colour ="grey8"), 
-                       vars_order = c("DTN_road", "perc_grassy", "perc_bf", "ndvi", "Daysinceburn", "burn_stat", "perc_burn")) %>% # plot line at zero _behind_coefs
+                       vars_order = c("DTN_road", "perc_grassy", "perc_bf", "ndvi", "Daysinceburn", "perc_burn")) %>% # plot line at zero _behind_coefs
   relabel_predictors(
     c(
       DTN_road = "Distance to Nearest Road",
       perc_grassy = "Percent Grassy",
       perc_bf = "Percent Broodfield",
-      ndvi = "NDVI")
+      ndvi = "NDVI", 
+      Daysinceburn ="Days Since Burn", 
+      perc_burn = "Percent Burn")
   ) +
   
   theme_bw() + xlab("Coefficient Estimate") + ylab("") + 
   scale_color_discrete(name = "2-Month Course Model", labels = c("Jan-Feb", "Mar-Apr", "May-Jun", "Jul-Aug", 
-                                                  "Sep-Oct", "Nov-Dec"), type = c('thistle2', 'plum3', 'plum4', 'slateblue', 'slateblue2', 'slateblue4'))# labels the legend then the models, then assigns colors 
+                                                  "Sep-Oct", "Nov-Dec"), type = c('mediumpurple3', 'dodgerblue', 'lightblue', 'lightgreen', 'darkgreen', 'darkgoldenrod'))# labels the legend then the models, then assigns colors 
 
 
-Fig3_month_2interv + xlim(c(-1,1)) + coord_flip()
+Fig3_month_2interv + xlim(c(-1,1)) +
+  theme(text = element_text(size=15),
+        axis.text.x = element_text(angle=25, hjust=1), 
+        legend.text = element_text(size = 20))
+
  
 
 ###############################################################################
@@ -501,27 +557,58 @@ Fig4_month = dwplot(month_mod,
                             model_order = NULL, 
                             dot_args = list(size = 3), 
                             vline = geom_vline(xintercept = 0, linetype = 2, colour ="grey8"), 
-                            vars_order = c("DTN_road", "perc_grassy", "perc_bf", "ndvi", "Daysinceburn", "burn_stat", "perc_burn")) %>% # plot line at zero _behind_coefs
+                            vars_order = c("DTN_road", "perc_grassy", "perc_bf", "ndvi", "Daysinceburn", "perc_burn")) %>% # plot line at zero _behind_coefs
   relabel_predictors(
     c(
       DTN_road = "Distance to Nearest Road",
       perc_grassy = "Percent Grassy",
       perc_bf = "Percent Broodfield",
-      ndvi = "NDVI")
+      ndvi = "NDVI", 
+      Daysinceburn = "Days Since Burn", 
+      perc_burn = "Percent Burn")
   ) +
-  
+  guides(color = guide_legend(reverse=TRUE)) +
   theme_bw() + xlab("Coefficient Estimate") + ylab("") + 
   scale_color_discrete(name = "Monthly Course Model", labels = c("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", 
                                                   "Sep", "Oct", "Nov", "Dec"), 
-                       type = c('thistle','thistle2', 'pink', 'pink3', 'plum','plum3',
-                                         'mediumorchid', 'mediumorchid4',
-                                         'slateblue', 'slateblue2', 'slateblue4',
-                                         'pink4'))# labels the legend then the models, then assigns colors 
+                       type = c('mediumpurple3','blue', 'dodgerblue', 'mediumseagreen', 'green', 'darkgreen', 'goldenrod1', 'darkorange', 'chocolate4', 'red2', 'deeppink4', 'plum3'))# labels the legend then the models, then assigns colors 
 
 
-Fig4_month + xlim(c(-1,1)) + coord_flip()
+Fig4_month + xlim(c(-1,1)) + coord_flip() +
+  theme(text = element_text(size=15),
+        axis.text.x = element_text(angle=25, hjust=1), 
+        legend.text = element_text(size = 20)) 
+
+# Distance to Nearest Road ---- 
+
+Fig4_month = dwplot(month_mod,
+                    ci = 0.95, 
+                    dodge_size = 0.9, # how far apart pts are frome eachother (0.4 = default) 
+                    show_intercept = FALSE, 
+                    model_order = NULL, 
+                    dot_args = list(size = 3), 
+                    vline = geom_vline(xintercept = 0, linetype = 2, colour ="grey8"), 
+                    vars_order = c("ndvi")) %>% # plot line at zero _behind_coefs
+  relabel_predictors(
+    c(
+      DTN_road = "Distance to Nearest Road",
+      perc_grassy = "Percent Grassy",
+      perc_bf = "Percent Broodfield",
+      ndvi = "NDVI", 
+      Daysinceburn = "Days Since Burn", 
+      perc_burn = "Percent Burn")
+  ) +
+  guides(color = guide_legend(reverse=TRUE)) +
+  theme_bw() + xlab("Coefficient Estimate") + ylab("") + 
+  scale_color_discrete(name = "Monthly Course Model", labels = c("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", 
+                                                                 "Sep", "Oct", "Nov", "Dec"), 
+                       type = c('mediumpurple3','blue', 'dodgerblue', 'slategray', 'green3', 'darkgreen', 'goldenrod1', 'orangered', 'chocolate4', 'red2', 'deeppink4', 'plum3'))# labels the legend then the models, then assigns colors 
 
 
+Fig4_month + xlim(c(-.1,1)) + coord_flip() +
+  theme(text = element_text(size=15),
+        axis.text.x = element_text(angle=0, hjust=1), 
+        legend.text = element_text(size = 20)) 
 
 
 
